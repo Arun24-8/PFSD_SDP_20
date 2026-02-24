@@ -1,0 +1,52 @@
+<section class="hero-section" id="how-it-works">
+  <div class="hero-inner">
+    <div class="hero-copy">
+      {% if patient_name %}
+      <p class="welcome-name">Welcome back, {{ patient_name }}</p>
+      {% endif %}
+      <h1>
+        Healthcare at your
+        <span>fingertips</span>
+      </h1>
+      <p>
+        Connect with top doctors online, book appointments instantly, and get
+        your prescriptions digitally. Secure, private, and accessible healthcare
+        for everyone.
+      </p>
+
+      <div class="hero-actions">
+        <a href="{% url 'login' %}" class="btn btn-primary btn-lg">
+          Book Consultation
+        </a>
+        <button class="btn btn-outline btn-lg" type="button">Learn More</button>
+      </div>
+
+      <div class="trust-row" id="about">
+        <div class="avatars" aria-hidden="true">
+          <span></span><span></span><span></span><span></span>
+        </div>
+        <p>Trusted by 10,000+ patients</p>
+      </div>
+    </div>
+
+    <div class="hero-media">
+      <div
+        class="doctor-card"
+        role="img"
+        aria-label="Doctor consultation image"
+      >
+        <img
+          src="https://images.pexels.com/photos/8376233/pexels-photo-8376233.jpeg?auto=compress&cs=tinysrgb&w=1400"
+          alt="Doctor at consultation desk"
+        />
+      </div>
+      <div class="secure-chip">
+        <div class="chip-icon">✓</div>
+        <div>
+          <strong>100% Secure</strong>
+          <p>HIPAA Compliant</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

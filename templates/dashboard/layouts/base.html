@@ -1,0 +1,16 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}MediConnect{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'dashboard/css/home.css' %}" />
+  </head>
+  <body>
+    <div class="site-shell">
+      {% include "dashboard/components/navbar.html" %}
+      <main>{% block content %}{% endblock %}</main>
+    </div>
+  </body>
+</html>

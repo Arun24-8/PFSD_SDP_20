@@ -1,0 +1,186 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Patient Dashboard - MediConnect</title>
+    <link
+      rel="stylesheet"
+      href="{% static 'dashboard/css/patient-dashboard.css' %}"
+    />
+  </head>
+  <body>
+    <div class="patient-shell">
+      <aside class="sidebar">
+        <div class="brand-wrap">
+          <div class="brand-icon">~</div>
+          <div>
+            <h2>MediConnect</h2>
+            <p>PRO HEALTHCARE</p>
+          </div>
+        </div>
+
+        <nav class="side-nav" aria-label="Patient menu">
+          <a href="#" class="side-link active">Dashboard</a>
+          <a href="#" class="side-link">Book Appointment</a>
+          <a href="#" class="side-link">My Prescriptions</a>
+          <a href="#" class="side-link">Video Consult</a>
+        </nav>
+
+        <div class="sidebar-user">
+          <div class="avatar">{{ patient_name|slice:":2"|upper }}</div>
+          <div class="sidebar-user-meta">
+            <strong>{{ patient_name }}</strong>
+            <p>Patient</p>
+          </div>
+        </div>
+
+        <a href="{% url 'signout' %}" class="signout-btn">Sign Out</a>
+      </aside>
+
+      <main class="content">
+        <header class="top-header">
+          <div>
+            <h1>Dashboard</h1>
+            <p>Welcome back to your health portal</p>
+          </div>
+          <button class="notify-btn" type="button" aria-label="Notifications">
+            <span>🔔</span>
+          </button>
+        </header>
+
+        <section class="dashboard-main">
+          <div class="welcome-head">
+            <div>
+              <h2>Welcome back, {{ patient_name }}</h2>
+              <p>Here's your health overview for today</p>
+            </div>
+            <a class="primary-btn" href="#">Book Appointment</a>
+          </div>
+
+          <div class="stats-grid">
+            <article class="stat-card">
+              <div class="stat-icon">📅</div>
+              <div class="stat-copy">
+                <h3>UPCOMING</h3>
+                <strong>2</strong>
+                <span>Appointments</span>
+              </div>
+            </article>
+
+            <article class="stat-card">
+              <div class="stat-icon green">📄</div>
+              <div class="stat-copy">
+                <h3>PRESCRIPTIONS</h3>
+                <strong>2</strong>
+                <span>Active Now</span>
+              </div>
+            </article>
+
+            <article class="stat-card">
+              <div class="stat-icon purple">∿</div>
+              <div class="stat-copy">
+                <h3>TOTAL VISITS</h3>
+                <strong>12</strong>
+                <span>Lifetime</span>
+              </div>
+            </article>
+          </div>
+
+          <div class="dashboard-grid">
+            <section class="panel">
+              <div class="panel-head">
+                <h3>Upcoming Schedule</h3>
+                <a href="#">View all</a>
+              </div>
+
+              <article class="schedule-card">
+                <div class="date-chip">
+                  <span>TODAY,</span>
+                  <strong>Oct</strong>
+                </div>
+
+                <div class="schedule-main">
+                  <h4>Dr. Sarah Johnson</h4>
+                  <p>Cardiologist</p>
+                  <div class="meta-chips">
+                    <span>02:00 PM</span>
+                    <span>Video Call</span>
+                  </div>
+                </div>
+
+                <button type="button" class="join-btn">Join Call</button>
+              </article>
+
+              <article class="schedule-card">
+                <div class="date-chip">
+                  <span>TOMORROW,</span>
+                  <strong>Oct</strong>
+                </div>
+
+                <div class="schedule-main">
+                  <h4>Dr. James Carter</h4>
+                  <p>Orthopedic Surgeon</p>
+                  <div class="meta-chips">
+                    <span>10:00 AM</span>
+                    <span>In-Person</span>
+                  </div>
+                </div>
+
+                <button type="button" class="join-btn">Join Call</button>
+              </article>
+            </section>
+
+            <section class="panel">
+              <div class="panel-head">
+                <h3>Recent Prescriptions</h3>
+                <a href="#">View all</a>
+              </div>
+
+              <article class="prescription-card">
+                <div class="prescription-head">
+                  <div>
+                    <h4>Dr. Michael Chen</h4>
+                    <p>Oct 10, 2023</p>
+                  </div>
+                  <span class="status-pill">ACTIVE</span>
+                </div>
+
+                <ul>
+                  <li>Amoxicillin 500mg</li>
+                  <li>Ibuprofen 400mg</li>
+                </ul>
+
+                <div class="action-row">
+                  <button type="button" class="btn-light">Download</button>
+                  <button type="button" class="btn-green">Refill</button>
+                </div>
+              </article>
+
+              <article class="prescription-card">
+                <div class="prescription-head">
+                  <div>
+                    <h4>Dr. Sarah Johnson</h4>
+                    <p>Sep 15, 2023</p>
+                  </div>
+                  <span class="status-pill">ACTIVE</span>
+                </div>
+
+                <ul>
+                  <li>Atorvastatin 10mg</li>
+                  <li>Aspirin 81mg</li>
+                </ul>
+
+                <div class="action-row">
+                  <button type="button" class="btn-light">Download</button>
+                  <button type="button" class="btn-green">Refill</button>
+                </div>
+              </article>
+            </section>
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

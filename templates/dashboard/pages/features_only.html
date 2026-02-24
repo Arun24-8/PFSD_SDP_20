@@ -1,0 +1,20 @@
+{% extends "dashboard/layouts/base.html" %} {% block title %}MediConnect |
+Features{% endblock %} {% block content %}
+<div class="dashboard-page">
+  <section class="features-hero" style="padding-top: 84px; background: #f3f5f9">
+    <div class="features-inner">
+      <h2>Complete Healthcare Platform</h2>
+      <p>Everything you need to manage your health in one place.</p>
+    </div>
+  </section>
+
+  <div class="features-area">
+    <div class="features-inner">
+      {% include "dashboard/sections/features.html" %} {% include
+      "dashboard/components/trust-row.html" %}
+    </div>
+  </div>
+
+  {% include "dashboard/components/floating-help.html" %}
+</div>
+{% endblock %}

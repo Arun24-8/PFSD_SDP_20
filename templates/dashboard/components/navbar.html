@@ -1,0 +1,24 @@
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <div class="brand-icon">❤</div>
+      <span>MediConnect</span>
+    </div>
+
+    <nav class="main-nav" aria-label="Primary">
+      <a href="{% url 'home' %}#features">Features</a>
+      <a href="{% url 'home' %}#how-it-works">How it Works</a>
+      <a href="{% url 'home' %}#about">About</a>
+    </nav>
+
+    <div class="nav-actions">
+      {% if patient_name %}
+      <span class="btn btn-outline">{{ patient_name }}</span>
+      <a href="{% url 'signout' %}" class="btn btn-primary">Sign Out</a>
+      {% else %}
+      <a href="{% url 'login' %}" class="btn btn-outline">Log In</a>
+      <button class="btn btn-primary" type="button">Get Started</button>
+      {% endif %}
+    </div>
+  </div>
+</header>
