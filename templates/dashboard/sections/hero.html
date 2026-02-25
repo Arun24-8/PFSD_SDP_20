@@ -1,7 +1,9 @@
 <section class="hero-section" id="how-it-works">
   <div class="hero-inner">
     <div class="hero-copy">
-      {% if patient_name %}
+      {% if admin_name %}
+      <p class="welcome-name">Welcome back, {{ admin_name }} (Administrator)</p>
+      {% elif patient_name %}
       <p class="welcome-name">Welcome back, {{ patient_name }}</p>
       {% endif %}
       <h1>
@@ -15,10 +17,22 @@
       </p>
 
       <div class="hero-actions">
+        {% if admin_name %}
+        <a href="{% url 'admin_dashboard' %}" class="btn btn-primary btn-lg">
+          Go to Dashboard
+        </a>
+        <a href="{% url 'signout' %}" class="btn btn-outline btn-lg">Sign Out</a>
+        {% elif patient_name %}
+        <a href="{% url 'patient_dashboard' %}" class="btn btn-primary btn-lg">
+          Go to Dashboard
+        </a>
+        <a href="{% url 'signout' %}" class="btn btn-outline btn-lg">Sign Out</a>
+        {% else %}
         <a href="{% url 'login' %}" class="btn btn-primary btn-lg">
           Book Consultation
         </a>
-        <button class="btn btn-outline btn-lg" type="button">Learn More</button>
+        <a href="#features" class="btn btn-outline btn-lg">Learn More</a>
+        {% endif %}
       </div>
 
       <div class="trust-row" id="about">

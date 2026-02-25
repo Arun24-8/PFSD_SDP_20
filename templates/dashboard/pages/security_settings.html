@@ -1,0 +1,287 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Security Settings - MediConnect</title>
+    <link
+      rel="stylesheet"
+      href="{% static 'dashboard/css/admin-dashboard.css' %}"
+    />
+  </head>
+  <body>
+    <div class="admin-shell">
+      <aside class="sidebar">
+        <div class="brand-wrap">
+          <div class="brand-icon">⚙</div>
+          <div>
+            <h2>MediConnect</h2>
+            <p>ADMIN PANEL</p>
+          </div>
+        </div>
+
+        <nav class="side-nav" aria-label="Admin menu">
+          <a href="/admin/dashboard/" class="side-link">Dashboard</a>
+          <a href="/admin/manage-users/" class="side-link">Manage Users</a>
+          <a href="/admin/reports/" class="side-link">Reports</a>
+          <a href="/admin/security/" class="side-link active">Security</a>
+        </nav>
+
+        <div class="sidebar-user">
+          <div class="avatar admin-avatar">A</div>
+          <div class="sidebar-user-meta">
+            <strong>Administrator</strong>
+            <p>Admin</p>
+          </div>
+        </div>
+
+        <a href="{% url 'signout' %}" class="signout-btn">Sign Out</a>
+      </aside>
+
+      <main class="content">
+        <header class="top-header">
+          <div>
+            <h1>Security Settings</h1>
+            <p>Configure system security and data protection</p>
+          </div>
+          <button class="notify-btn" type="button" aria-label="Refresh">
+            <span>🔄</span>
+          </button>
+        </header>
+
+        <section class="dashboard-main">
+          <div class="welcome-head">
+            <div>
+              <h2>System Security</h2>
+              <p>Manage security policies and protections</p>
+            </div>
+          </div>
+
+          <div class="settings-grid">
+            <section class="panel">
+              <div class="panel-head">
+                <h3>Authentication</h3>
+              </div>
+
+              <div class="setting-item">
+                <div class="setting-info">
+                  <h4>Two-Factor Authentication</h4>
+                  <p>Enable for all admin accounts</p>
+                </div>
+                <div class="toggle-switch">
+                  <input type="checkbox" id="tfa" checked />
+                  <label for="tfa"></label>
+                </div>
+              </div>
+
+              <div class="setting-item">
+                <div class="setting-info">
+                  <h4>Password Policy</h4>
+                  <p>Minimum 12 characters required</p>
+                </div>
+                <button class="btn-small">Configure</button>
+              </div>
+
+              <div class="setting-item">
+                <div class="setting-info">
+                  <h4>Session Timeout</h4>
+                  <p>Auto-logout after 30 minutes</p>
+                </div>
+                <button class="btn-small">Edit</button>
+              </div>
+
+              <div class="setting-item border-top">
+                <div class="setting-info">
+                  <h4>Login Attempts</h4>
+                  <p>Max 5 failed attempts before lockout</p>
+                </div>
+                <button class="btn-small">Modify</button>
+              </div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-head">
+                <h3>Data Protection</h3>
+              </div>
+
+              <div class="setting-item">
+                <div class="setting-info">
+                  <h4>SSL/TLS Encryption</h4>
+                  <p>HTTPS enabled for all traffic</p>
+                </div>
+                <span class="status-badge online">Active</span>
+              </div>
+
+              <div class="setting-item">
+                <div class="setting-info">
+                  <h4>Data Backup</h4>
+                  <p>Automatic daily backups enabled</p>
+                </div>
+                <button class="btn-small">Configure</button>
+              </div>
+
+              <div class="setting-item">
+                <div class="setting-info">
+                  <h4>Encryption Algorithm</h4>
+                  <p>AES-256 for sensitive data</p>
+                </div>
+                <button class="btn-small">View</button>
+              </div>
+
+              <div class="setting-item border-top">
+                <div class="setting-info">
+                  <h4>GDPR Compliance</h4>
+                  <p>Fully compliant with regulations</p>
+                </div>
+                <span class="status-badge online">Compliant</span>
+              </div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-head">
+                <h3>Access Control</h3>
+              </div>
+
+              <div class="setting-item">
+                <div class="setting-info">
+                  <h4>IP Whitelisting</h4>
+                  <p>Restrict admin access to specific IPs</p>
+                </div>
+                <div class="toggle-switch">
+                  <input type="checkbox" id="ipwhite" />
+                  <label for="ipwhite"></label>
+                </div>
+              </div>
+
+              <div class="setting-item">
+                <div class="setting-info">
+                  <h4>Role-Based Access (RBAC)</h4>
+                  <p>Control permissions by role</p>
+                </div>
+                <button class="btn-small">Manage</button>
+              </div>
+
+              <div class="setting-item">
+                <div class="setting-info">
+                  <h4>API Keys</h4>
+                  <p>Generate and revoke API access</p>
+                </div>
+                <button class="btn-small">Manage</button>
+              </div>
+
+              <div class="setting-item border-top">
+                <div class="setting-info">
+                  <h4>Audit Logging</h4>
+                  <p>Track all admin activities</p>
+                </div>
+                <span class="status-badge online">Enabled</span>
+              </div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-head">
+                <h3>Threat Management</h3>
+              </div>
+
+              <div class="alert-item warning">
+                <div class="alert-icon">⚠️</div>
+                <div class="alert-info">
+                  <h4>Brute Force Attempts</h4>
+                  <p>3 attempts detected today</p>
+                  <span class="time">Last 4 hours ago</span>
+                </div>
+                <button class="btn-small">Review</button>
+              </div>
+
+              <div class="alert-item success">
+                <div class="alert-icon">✓</div>
+                <div class="alert-info">
+                  <h4>Malware Scan</h4>
+                  <p>System clean - No threats detected</p>
+                  <span class="time">Scan completed 2 hours ago</span>
+                </div>
+              </div>
+
+              <div class="alert-item">
+                <div class="alert-icon">📋</div>
+                <div class="alert-info">
+                  <h4>Vulnerability Assessment</h4>
+                  <p>All patches applied and current</p>
+                  <span class="time">Last checked today</span>
+                </div>
+              </div>
+
+              <div class="setting-item border-top">
+                <div class="setting-info">
+                  <h4>Enable Advanced DDoS Protection</h4>
+                  <p>Cloud-based DDoS mitigation</p>
+                </div>
+                <div class="toggle-switch">
+                  <input type="checkbox" id="ddos" checked />
+                  <label for="ddos"></label>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <section class="panel full-width">
+            <div class="panel-head">
+              <h3>Recent Security Events</h3>
+              <a href="#">View All Logs</a>
+            </div>
+
+            <table class="logs-table">
+              <thead>
+                <tr>
+                  <th>Event</th>
+                  <th>User</th>
+                  <th>IP Address</th>
+                  <th>Timestamp</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Admin Login</td>
+                  <td>Administrator</td>
+                  <td>192.168.1.100</td>
+                  <td>Today, 09:45 AM</td>
+                  <td><span class="status-badge online">Success</span></td>
+                </tr>
+                <tr>
+                  <td>Failed Login Attempt</td>
+                  <td>Unknown User</td>
+                  <td>203.45.67.89</td>
+                  <td>Today, 08:12 AM</td>
+                  <td><span class="status-badge warning">Failed</span></td>
+                </tr>
+                <tr>
+                  <td>User Deleted</td>
+                  <td>Administrator</td>
+                  <td>192.168.1.100</td>
+                  <td>Today, 07:33 AM</td>
+                  <td><span class="status-badge online">Success</span></td>
+                </tr>
+                <tr>
+                  <td>Settings Modified</td>
+                  <td>Administrator</td>
+                  <td>192.168.1.100</td>
+                  <td>Yesterday, 04:15 PM</td>
+                  <td><span class="status-badge online">Success</span></td>
+                </tr>
+                <tr>
+                  <td>Database Backup</td>
+                  <td>System</td>
+                  <td>Internal</td>
+                  <td>Yesterday, 01:00 AM</td>
+                  <td><span class="status-badge online">Success</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </section>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

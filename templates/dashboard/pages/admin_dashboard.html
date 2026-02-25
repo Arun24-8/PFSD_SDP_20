@@ -1,0 +1,186 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard - MediConnect</title>
+    <link
+      rel="stylesheet"
+      href="{% static 'dashboard/css/admin-dashboard.css' %}"
+    />
+  </head>
+  <body>
+    <div class="admin-shell">
+      <aside class="sidebar">
+        <div class="brand-wrap">
+          <div class="brand-icon">⚙</div>
+          <div>
+            <h2>MediConnect</h2>
+            <p>ADMIN PANEL</p>
+          </div>
+        </div>
+
+        <nav class="side-nav" aria-label="Admin menu">
+          <a href="/admin/dashboard/" class="side-link active">Dashboard</a>
+          <a href="/admin/manage-users/" class="side-link">Manage Users</a>
+          <a href="/admin/reports/" class="side-link">Reports</a>
+          <a href="/admin/security/" class="side-link">Security</a>
+        </nav>
+
+        <div class="sidebar-user">
+          <div class="avatar admin-avatar">{{ admin_profile.user.first_name|slice:":2"|upper }}</div>
+          <div class="sidebar-user-meta">
+            <strong>{{ admin_profile.user.first_name }} {{ admin_profile.user.last_name }}</strong>
+            <p>Administrator</p>
+          </div>
+        </div>
+
+        <a href="{% url 'signout' %}" class="signout-btn">Sign Out</a>
+      </aside>
+
+      <main class="content">
+        <header class="top-header">
+          <div>
+            <h1>Admin Dashboard</h1>
+            <p>System management and monitoring</p>
+          </div>
+          <button class="notify-btn" type="button" aria-label="Notifications">
+            <span>🔔</span>
+          </button>
+        </header>
+
+        <section class="dashboard-main">
+          <div class="welcome-head">
+            <div>
+              <h2>Welcome back, {{ admin_profile.user.first_name }}</h2>
+              <p>Here's your system overview</p>
+            </div>
+          </div>
+
+          <div class="stats-grid">
+            <article class="stat-card">
+              <div class="stat-icon">👥</div>
+              <div class="stat-copy">
+                <h3>TOTAL USERS</h3>
+                <strong>156</strong>
+                <span>Active Users</span>
+              </div>
+            </article>
+
+            <article class="stat-card">
+              <div class="stat-icon green">👨‍⚕️</div>
+              <div class="stat-copy">
+                <h3>DOCTORS</h3>
+                <strong>32</strong>
+                <span>Verified</span>
+              </div>
+            </article>
+
+            <article class="stat-card">
+              <div class="stat-icon blue">🏥</div>
+              <div class="stat-copy">
+                <h3>CONSULTATIONS</h3>
+                <strong>487</strong>
+                <span>This Month</span>
+              </div>
+            </article>
+
+            <article class="stat-card">
+              <div class="stat-icon purple">⚠️</div>
+              <div class="stat-copy">
+                <h3>ALERTS</h3>
+                <strong>5</strong>
+                <span>Pending Review</span>
+              </div>
+            </article>
+          </div>
+
+          <div class="dashboard-grid">
+            <section class="panel">
+              <div class="panel-head">
+                <h3>System Status</h3>
+                <a href="#">Details</a>
+              </div>
+
+              <div class="status-item">
+                <div class="status-info">
+                  <h4>Database</h4>
+                  <p>PostgreSQL Server</p>
+                </div>
+                <span class="status-badge online">Online</span>
+              </div>
+
+              <div class="status-item">
+                <div class="status-info">
+                  <h4>API Server</h4>
+                  <p>Django REST API</p>
+                </div>
+                <span class="status-badge online">Online</span>
+              </div>
+
+              <div class="status-item">
+                <div class="status-info">
+                  <h4>Email Service</h4>
+                  <p>SMTP Configuration</p>
+                </div>
+                <span class="status-badge online">Online</span>
+              </div>
+
+              <div class="status-item">
+                <div class="status-info">
+                  <h4>File Storage</h4>
+                  <p>Media Server</p>
+                </div>
+                <span class="status-badge warning">Degraded</span>
+              </div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-head">
+                <h3>Recent Activity</h3>
+                <a href="#">View all</a>
+              </div>
+
+              <article class="activity-item">
+                <div class="activity-icon">✓</div>
+                <div class="activity-details">
+                  <h4>New Doctor Verified</h4>
+                  <p>Dr. Sarah Johnson verified</p>
+                  <span class="time">2 hours ago</span>
+                </div>
+              </article>
+
+              <article class="activity-item">
+                <div class="activity-icon warning">!</div>
+                <div class="activity-details">
+                  <h4>Security Alert</h4>
+                  <p>Multiple failed login attempts detected</p>
+                  <span class="time">4 hours ago</span>
+                </div>
+              </article>
+
+              <article class="activity-item">
+                <div class="activity-icon">+</div>
+                <div class="activity-details">
+                  <h4>New Patient Registration</h4>
+                  <p>10 new patients registered today</p>
+                  <span class="time">6 hours ago</span>
+                </div>
+              </article>
+
+              <article class="activity-item">
+                <div class="activity-icon">📋</div>
+                <div class="activity-details">
+                  <h4>System Backup Completed</h4>
+                  <p>Daily backup successfully executed</p>
+                  <span class="time">8 hours ago</span>
+                </div>
+              </article>
+            </section>
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>
