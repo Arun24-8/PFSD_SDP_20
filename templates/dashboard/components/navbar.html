@@ -12,9 +12,14 @@
     </nav>
 
     <div class="nav-actions">
-      {% if patient_name %}
+      {% if admin_name %}
+      <span class="btn btn-outline">{{ admin_name }} (Admin)</span>
+      <a href="{% url 'admin_dashboard' %}" class="btn btn-primary">Dashboard</a>
+      <a href="{% url 'signout' %}" class="btn btn-outline">Sign Out</a>
+      {% elif patient_name %}
       <span class="btn btn-outline">{{ patient_name }}</span>
-      <a href="{% url 'signout' %}" class="btn btn-primary">Sign Out</a>
+      <a href="{% url 'patient_dashboard' %}" class="btn btn-primary">Dashboard</a>
+      <a href="{% url 'signout' %}" class="btn btn-outline">Sign Out</a>
       {% else %}
       <a href="{% url 'login' %}" class="btn btn-outline">Log In</a>
       <button class="btn btn-primary" type="button">Get Started</button>

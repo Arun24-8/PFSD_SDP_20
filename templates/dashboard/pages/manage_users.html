@@ -1,0 +1,147 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Manage Users - MediConnect</title>
+    <link
+      rel="stylesheet"
+      href="{% static 'dashboard/css/admin-dashboard.css' %}"
+    />
+  </head>
+  <body>
+    <div class="admin-shell">
+      <aside class="sidebar">
+        <div class="brand-wrap">
+          <div class="brand-icon">⚙</div>
+          <div>
+            <h2>MediConnect</h2>
+            <p>ADMIN PANEL</p>
+          </div>
+        </div>
+
+        <nav class="side-nav" aria-label="Admin menu">
+          <a href="/admin/dashboard/" class="side-link">Dashboard</a>
+          <a href="/admin/manage-users/" class="side-link active">Manage Users</a>
+          <a href="/admin/reports/" class="side-link">Reports</a>
+          <a href="/admin/security/" class="side-link">Security</a>
+        </nav>
+
+        <div class="sidebar-user">
+          <div class="avatar admin-avatar">A</div>
+          <div class="sidebar-user-meta">
+            <strong>Administrator</strong>
+            <p>Admin</p>
+          </div>
+        </div>
+
+        <a href="{% url 'signout' %}" class="signout-btn">Sign Out</a>
+      </aside>
+
+      <main class="content">
+        <header class="top-header">
+          <div>
+            <h1>Manage Users</h1>
+            <p>Control and monitor all system users</p>
+          </div>
+          <button class="notify-btn" type="button" aria-label="Add User">
+            <span>➕</span>
+          </button>
+        </header>
+
+        <section class="dashboard-main">
+          <div class="welcome-head">
+            <div>
+              <h2>User Management</h2>
+              <p>View, edit, and manage system users</p>
+            </div>
+            <button class="primary-btn">Add New User</button>
+          </div>
+
+          <div class="filter-bar">
+            <input type="text" placeholder="Search users..." class="search-input" />
+            <select class="filter-select">
+              <option>All Roles</option>
+              <option>Admin</option>
+              <option>Doctor</option>
+              <option>Patient</option>
+            </select>
+            <select class="filter-select">
+              <option>All Status</option>
+              <option>Active</option>
+              <option>Inactive</option>
+              <option>Suspended</option>
+            </select>
+          </div>
+
+          <section class="panel">
+            <div class="panel-head">
+              <h3>All Users</h3>
+              <p>Total: {{ users.count }}</p>
+            </div>
+
+            <div class="table-wrapper">
+              <table class="users-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Joined</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for user in users %}
+                  <tr>
+                    <td>
+                      <div class="user-cell">
+                        <div class="user-avatar">{{ user.first_name|slice:":1"|upper }}</div>
+                        <div>
+                          <strong>{{ user.first_name }} {{ user.last_name }}</strong>
+                          <span class="user-id">#{{ user.id }}</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td>{{ user.email }}</td>
+                    <td>
+                      {% if user.is_staff %}
+                        <span class="role-badge admin">Admin</span>
+                      {% elif user.groups.all %}
+                        <span class="role-badge">{{ user.groups.first.name }}</span>
+                      {% else %}
+                        <span class="role-badge patient">Patient</span>
+                      {% endif %}
+                    </td>
+                    <td>
+                      {% if user.is_active %}
+                        <span class="status-badge online">Active</span>
+                      {% else %}
+                        <span class="status-badge offline">Inactive</span>
+                      {% endif %}
+                    </td>
+                    <td>{{ user.date_joined|date:"M d, Y" }}</td>
+                    <td>
+                      <div class="action-buttons">
+                        <button class="btn-icon" title="Edit">✏️</button>
+                        <button class="btn-icon" title="View">👁️</button>
+                        <button class="btn-icon danger" title="Delete">🗑️</button>
+                      </div>
+                    </td>
+                  </tr>
+                  {% empty %}
+                  <tr>
+                    <td colspan="6" class="empty-state">No users found</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>
