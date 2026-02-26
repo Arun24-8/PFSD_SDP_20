@@ -1,3 +1,11 @@
 from django.contrib import admin
 
-# Register your models here.
+from .models import Doctor
+
+
+@admin.register(Doctor)
+class DoctorAdmin(admin.ModelAdmin):
+    list_display = ('name', 'rating')
+    search_fields = ('name',)
+
+# Register your doctor app models here. For now, there are no models to register.

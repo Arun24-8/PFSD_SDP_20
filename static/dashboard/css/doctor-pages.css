@@ -1,0 +1,2 @@
+/* Doctor-specific page styles import patient page styles as a baseline */
+@import url('patient-pages.css');

@@ -1,6 +1,8 @@
 import re
+import random
 
 from django.shortcuts import render, redirect
+from .models import Doctor
 
 
 PATIENT_BOOKING_DOCTORS = [
@@ -47,6 +49,7 @@ PATIENT_BOOKING_DOCTORS = [
 ]
 
 
+
 def _name_from_email(email):
     local_part = (email or "").split("@", 1)[0].strip()
     cleaned = re.sub(r"[._-]+", " ", local_part)
@@ -54,21 +57,29 @@ def _name_from_email(email):
     return normalized.title() if normalized else "Patient"
 
 
+
 def home(request):
     patient_name = request.session.get("patient_name")
     admin_name = request.session.get("admin_name")
+    doctor_name = request.session.get("doctor_name")
     return render(
         request,
         "dashboard/pages/doctor/home.html",
         {
             "patient_name": patient_name,
             "admin_name": admin_name,
+            "doctor_name": doctor_name,
         },
     )
 
 
 def features(request):
-    return render(request, "dashboard/pages/doctor/features_only.html")
+    doctor_name = request.session.get("doctor_name")
+    return render(
+        request,
+        "dashboard/pages/doctor/features_only.html",
+        {"doctor_name": doctor_name},
+    )
 
 
 def patient_dashboard(request):
@@ -140,9 +151,23 @@ def login(request):
             request.session["admin_name"] = _name_from_email(email)
             return redirect("admin_dashboard")
         elif role == "doctor":
-            request.session["doctor_name"] = _name_from_email(email)
-            # Redirect to doctor dashboard when created
-            return redirect("home")
+            doctor_name = _name_from_email(email)
+            request.session["doctor_name"] = doctor_name
+            # ensure a Doctor record exists with a rating; pick random if new
+            try:
+                doctor_obj, created = Doctor.objects.get_or_create(name=doctor_name)
+                if created:
+                    doctor_obj.rating = round(random.uniform(4.0, 5.0), 2)
+                    doctor_obj.save()
+            except Exception as err:
+                # avoid crashing when table does not yet exist
+                from django.db import utils as db_utils
+
+                if isinstance(err, db_utils.OperationalError):
+                    pass
+                else:
+                    raise
+            return redirect("doctor_dashboard")
         else:
             request.session.pop("patient_name", None)
             request.session.pop("admin_name", None)
@@ -151,6 +176,145 @@ def login(request):
         return redirect("home")
 
     return render(request, "dashboard/pages/dashboard/login.html")
+
+
+# sample schedule items for a doctor; in a real app these would come from a model
+DOCTOR_SCHEDULE = [
+    {
+        "date_label": "TODAY",
+        "month": "Oct",
+        "patient": "John Doe",
+        "specialist": "General Medicine",
+        "time": "11:00 AM",
+        "mode": "In-Person",
+    },
+    {
+        "date_label": "TOMORROW",
+        "month": "Oct",
+        "patient": "Jane Smith",
+        "specialist": "Dermatology",
+        "time": "02:30 PM",
+        "mode": "Video Call",
+    },
+]
+
+
+def doctor_dashboard(request):
+    doctor_name = request.session.get("doctor_name")
+    if not doctor_name:
+        return redirect("login")
+
+    # fetch doctor rating if model/table exists; the table may not exist until
+    # migrations are run, so catch OperationalError to avoid crashing.
+    rating = None
+    try:
+        rating = Doctor.objects.get(name=doctor_name).rating
+    except Doctor.DoesNotExist:
+        # doctor record not in DB yet; leave rating as None
+        rating = None
+    except Exception as err:  # broad catch for DB errors like missing table
+        from django.db import utils as db_utils
+
+        if isinstance(err, db_utils.OperationalError):
+            # likely migrations not applied; skip rating lookup
+            rating = None
+        else:
+            raise
+
+    return render(
+        request,
+        "dashboard/pages/doctor/doctor_dashboard.html",
+        {
+            "doctor_name": doctor_name,
+            "active": "dashboard",
+            "rating": rating,
+            "schedule": DOCTOR_SCHEDULE,
+        },
+    )
+
+
+def doctor_appointments(request):
+    doctor_name = request.session.get("doctor_name")
+    if not doctor_name:
+        return redirect("login")
+
+    return render(
+        request,
+        "dashboard/pages/doctor/doctor_appointments.html",
+        {"doctor_name": doctor_name, "active": "appointments"},
+    )
+
+
+def doctor_patients(request):
+    doctor_name = request.session.get("doctor_name")
+    if not doctor_name:
+        return redirect("login")
+
+    return render(
+        request,
+        "dashboard/pages/doctor/doctor_patients.html",
+        {"doctor_name": doctor_name, "active": "patients"},
+    )
+
+
+def doctor_consultations(request):
+    doctor_name = request.session.get("doctor_name")
+    if not doctor_name:
+        return redirect("login")
+
+    return render(
+        request,
+        "dashboard/pages/doctor/doctor_consultations.html",
+        {"doctor_name": doctor_name, "active": "consultations"},
+    )
+
+
+def doctor_e_prescriptions(request):
+    doctor_name = request.session.get("doctor_name")
+    if not doctor_name:
+        return redirect("login")
+
+    return render(
+        request,
+        "dashboard/pages/doctor/doctor_e_prescriptions.html",
+        {"doctor_name": doctor_name, "active": "e_prescriptions"},
+    )
+
+
+def doctor_notifications(request):
+    doctor_name = request.session.get("doctor_name")
+    if not doctor_name:
+        return redirect("login")
+
+    return render(
+        request,
+        "dashboard/pages/doctor/doctor_notifications.html",
+        {"doctor_name": doctor_name, "active": "notifications"},
+    )
+
+
+def doctor_reports(request):
+    doctor_name = request.session.get("doctor_name")
+    if not doctor_name:
+        return redirect("login")
+
+    return render(
+        request,
+        "dashboard/pages/doctor/doctor_reports.html",
+        {"doctor_name": doctor_name, "active": "reports"},
+    )
+
+
+def doctor_profile(request):
+    doctor_name = request.session.get("doctor_name")
+    if not doctor_name:
+        return redirect("login")
+
+    return render(
+        request,
+        "dashboard/pages/doctor/doctor_profile.html",
+        {"doctor_name": doctor_name, "active": "profile"},
+    )
 
 
 def signout(request):
