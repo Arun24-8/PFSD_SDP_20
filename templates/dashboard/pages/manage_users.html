@@ -51,12 +51,20 @@
         </header>
 
         <section class="dashboard-main">
+          {% if messages %}
+          <div class="messages">
+            {% for message in messages %}
+              <div class="message {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+          </div>
+          {% endif %}
+
           <div class="welcome-head">
             <div>
               <h2>User Management</h2>
               <p>View, edit, and manage system users</p>
             </div>
-            <button class="primary-btn">Add New User</button>
+            <a href="{% url 'admin_add_user' %}" class="primary-btn">Add New User</a>
           </div>
 
           <div class="filter-bar">
@@ -125,9 +133,9 @@
                     <td>{{ user.date_joined|date:"M d, Y" }}</td>
                     <td>
                       <div class="action-buttons">
-                        <button class="btn-icon" title="Edit">✏️</button>
-                        <button class="btn-icon" title="View">👁️</button>
-                        <button class="btn-icon danger" title="Delete">🗑️</button>
+                        <a href="{% url 'admin_edit_user' user.id %}" class="btn-icon" title="Edit">✏️</a>
+                        <a href="{% url 'admin_view_user' user.id %}" class="btn-icon" title="View">👁️</a>
+                        <a href="{% url 'admin_delete_user' user.id %}" class="btn-icon danger" title="Delete">🗑️</a>
                       </div>
                     </td>
                   </tr>

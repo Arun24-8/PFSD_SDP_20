@@ -1,0 +1,63 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>View User - MediConnect</title>
+    <link
+      rel="stylesheet"
+      href="{% static 'dashboard/css/admin-dashboard.css' %}"
+    />
+  </head>
+  <body>
+    <div class="admin-shell">
+      <aside class="sidebar">
+        <div class="brand-wrap">
+          <div class="brand-icon">⚙</div>
+          <div>
+            <h2>MediConnect</h2>
+            <p>ADMIN PANEL</p>
+          </div>
+        </div>
+
+        <nav class="side-nav" aria-label="Admin menu">
+          <a href="/admin/dashboard/" class="side-link">Dashboard</a>
+          <a href="/admin/manage-users/" class="side-link active">Manage Users</a>
+          <a href="/admin/reports/" class="side-link">Reports</a>
+          <a href="/admin/security/" class="side-link">Security</a>
+        </nav>
+
+        <div class="sidebar-user">
+          <div class="avatar admin-avatar">A</div>
+          <div class="sidebar-user-meta">
+            <strong>Administrator</strong>
+            <p>Admin</p>
+          </div>
+        </div>
+
+        <a href="{% url 'signout' %}" class="signout-btn">Sign Out</a>
+      </aside>
+
+      <main class="content">
+        <header class="top-header">
+          <div>
+            <h1>View User</h1>
+          </div>
+        </header>
+
+        <section class="dashboard-main">
+          <div class="user-details">
+            <p><strong>Username:</strong> {{ user_obj.username }}</p>
+            <p><strong>Name:</strong> {{ user_obj.first_name }} {{ user_obj.last_name }}</p>
+            <p><strong>Email:</strong> {{ user_obj.email }}</p>
+            <p><strong>Role:</strong> {% if user_obj.is_staff %}Admin{% else %}User{% endif %}</p>
+            <p><strong>Status:</strong> {% if user_obj.is_active %}Active{% else %}Inactive{% endif %}</p>
+            <p><strong>Joined:</strong> {{ user_obj.date_joined|date:"M d, Y" }}</p>
+          </div>
+          <a href="{% url 'manage_users' %}" class="primary-btn">Back</a>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

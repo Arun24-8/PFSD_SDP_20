@@ -56,23 +56,23 @@
               <h2>Analytics & Reports</h2>
               <p>Monitor system performance and user activity</p>
             </div>
-            <button class="primary-btn">Generate Report</button>
+            <button class="primary-btn" type="button" onclick="generateReport()">Generate Report</button>
           </div>
 
           <div class="filter-bar">
-            <select class="filter-select">
-              <option>Daily</option>
-              <option>Weekly</option>
-              <option>Monthly</option>
-              <option>Yearly</option>
+            <select class="filter-select" id="frequency_select">
+              <option value="Daily" {% if frequency == 'Daily' %}selected{% endif %}>Daily</option>
+              <option value="Weekly" {% if frequency == 'Weekly' %}selected{% endif %}>Weekly</option>
+              <option value="Monthly" {% if frequency == 'Monthly' %}selected{% endif %}>Monthly</option>
+              <option value="Yearly" {% if frequency == 'Yearly' %}selected{% endif %}>Yearly</option>
             </select>
-            <select class="filter-select">
-              <option>Last 7 Days</option>
-              <option>Last 30 Days</option>
-              <option>Last 90 Days</option>
-              <option>Custom Range</option>
+            <select class="filter-select" id="date_range_select">
+              <option value="Last 7 Days" {% if date_range == 'Last 7 Days' %}selected{% endif %}>Last 7 Days</option>
+              <option value="Last 30 Days" {% if date_range == 'Last 30 Days' %}selected{% endif %}>Last 30 Days</option>
+              <option value="Last 90 Days" {% if date_range == 'Last 90 Days' %}selected{% endif %}>Last 90 Days</option>
+              <option value="Custom Range" {% if date_range == 'Custom Range' %}selected{% endif %}>Custom Range</option>
             </select>
-            <button class="primary-btn">Export</button>
+            <button class="primary-btn" type="button" onclick="exportReport()">Export</button>
           </div>
 
           <div class="stats-grid">
@@ -230,5 +230,23 @@
         </section>
       </main>
     </div>
+
+    <script>
+      function generateReport() {
+        const frequency = document.getElementById('frequency_select').value;
+        const dateRange = document.getElementById('date_range_select').value;
+        
+        // Navigate to reports page with selected filters
+        window.location.href = `/admin/reports/?frequency=${encodeURIComponent(frequency)}&date_range=${encodeURIComponent(dateRange)}`;
+      }
+
+      function exportReport() {
+        const frequency = document.getElementById('frequency_select').value;
+        const dateRange = document.getElementById('date_range_select').value;
+        
+        // Navigate to export endpoint with selected filters
+        window.location.href = `/admin/reports/export/?frequency=${encodeURIComponent(frequency)}&date_range=${encodeURIComponent(dateRange)}`;
+      }
+    </script>
   </body>
 </html>

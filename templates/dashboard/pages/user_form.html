@@ -1,0 +1,61 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ title }} - MediConnect</title>
+    <link
+      rel="stylesheet"
+      href="{% static 'dashboard/css/admin-dashboard.css' %}"
+    />
+  </head>
+  <body>
+    <div class="admin-shell">
+      <!-- reuse same sidebar/nav as manage_users -->
+      <aside class="sidebar">
+        <div class="brand-wrap">
+          <div class="brand-icon">⚙</div>
+          <div>
+            <h2>MediConnect</h2>
+            <p>ADMIN PANEL</p>
+          </div>
+        </div>
+
+        <nav class="side-nav" aria-label="Admin menu">
+          <a href="/admin/dashboard/" class="side-link">Dashboard</a>
+          <a href="/admin/manage-users/" class="side-link active">Manage Users</a>
+          <a href="/admin/reports/" class="side-link">Reports</a>
+          <a href="/admin/security/" class="side-link">Security</a>
+        </nav>
+
+        <div class="sidebar-user">
+          <div class="avatar admin-avatar">A</div>
+          <div class="sidebar-user-meta">
+            <strong>Administrator</strong>
+            <p>Admin</p>
+          </div>
+        </div>
+
+        <a href="{% url 'signout' %}" class="signout-btn">Sign Out</a>
+      </aside>
+
+      <main class="content">
+        <header class="top-header">
+          <div>
+            <h1>{{ title }}</h1>
+          </div>
+        </header>
+
+        <section class="dashboard-main">
+          <form method="post" class="user-form">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button class="primary-btn" type="submit">Submit</button>
+            <a href="{% url 'manage_users' %}" class="secondary-btn">Cancel</a>
+          </form>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>
