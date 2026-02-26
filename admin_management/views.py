@@ -4,6 +4,7 @@ from .models import AdminProfile
 
 # Create your views here.
 
+
 def is_admin(request):
     """Check if user is logged in as admin"""
     return request.session.get("admin_name") is not None
@@ -13,7 +14,7 @@ def admin_dashboard(request):
     """Display admin dashboard"""
     if not is_admin(request):
         return redirect('login')
-    
+
     admin_name = request.session.get("admin_name")
     context = {
         'admin_profile': {
@@ -23,35 +24,34 @@ def admin_dashboard(request):
             }
         },
     }
-    return render(request, 'dashboard/pages/admin_dashboard.html', context)
+    return render(request, 'dashboard/pages/dashboard/admin_dashboard.html', context)
 
 
 def manage_users(request):
     """Manage users in the system"""
     if not is_admin(request):
         return redirect('login')
-    
+
     users = User.objects.all()
     context = {
         'users': users,
     }
-    return render(request, 'dashboard/pages/manage_users.html', context)
+    return render(request, 'dashboard/pages/dashboard/manage_users.html', context)
 
 
 def view_reports(request):
     """View system reports"""
     if not is_admin(request):
         return redirect('login')
-    
+
     context = {}
-    return render(request, 'dashboard/pages/view_reports.html', context)
+    return render(request, 'dashboard/pages/dashboard/view_reports.html', context)
 
 
 def security_settings(request):
     """Manage security settings"""
     if not is_admin(request):
         return redirect('login')
-    
-    context = {}
-    return render(request, 'dashboard/pages/security_settings.html', context)
 
+    context = {}
+    return render(request, 'dashboard/pages/dashboard/security_settings.html', context)

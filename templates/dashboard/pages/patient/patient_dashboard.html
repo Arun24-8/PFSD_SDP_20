@@ -22,10 +22,15 @@
         </div>
 
         <nav class="side-nav" aria-label="Patient menu">
-          <a href="#" class="side-link active">Dashboard</a>
-          <a href="#" class="side-link">Book Appointment</a>
-          <a href="#" class="side-link">My Prescriptions</a>
-          <a href="#" class="side-link">Video Consult</a>
+          <a href="{% url 'patient_dashboard' %}" class="side-link active"
+            >Dashboard</a
+          >
+          <a href="{% url 'patient_appointments' %}" class="side-link"
+            >Book Appointment</a
+          >
+          <a href="{% url 'patient_prescriptions' %}" class="side-link"
+            >My Prescriptions</a
+          >
         </nav>
 
         <div class="sidebar-user">
@@ -56,7 +61,9 @@
               <h2>Welcome back, {{ patient_name }}</h2>
               <p>Here's your health overview for today</p>
             </div>
-            <a class="primary-btn" href="#">Book Appointment</a>
+            <a class="primary-btn" href="{% url 'patient_appointments' %}"
+              >Book Appointment</a
+            >
           </div>
 
           <div class="stats-grid">
@@ -110,7 +117,15 @@
                   </div>
                 </div>
 
-                <button type="button" class="join-btn">Join Call</button>
+                <button
+                  type="button"
+                  class="join-btn"
+                  data-doctor="Dr. Sarah Johnson"
+                  data-specialist="Cardiologist"
+                  data-time="02:00 PM"
+                >
+                  Join Call
+                </button>
               </article>
 
               <article class="schedule-card">
@@ -128,7 +143,15 @@
                   </div>
                 </div>
 
-                <button type="button" class="join-btn">Join Call</button>
+                <button
+                  type="button"
+                  class="join-btn"
+                  data-doctor="Dr. James Carter"
+                  data-specialist="Orthopedic Surgeon"
+                  data-time="10:00 AM"
+                >
+                  Join Call
+                </button>
               </article>
             </section>
 
@@ -182,5 +205,112 @@
         </section>
       </main>
     </div>
+
+    <div id="callModal" class="call-modal" aria-hidden="true">
+      <div
+        class="call-card"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Video call popup"
+      >
+        <div class="call-top">
+          <div>
+            <h3 id="callDoctor">Doctor</h3>
+            <p id="callSpecialist">Specialist</p>
+          </div>
+          <span class="call-live">● Live</span>
+        </div>
+
+        <div class="call-video-area">
+          <div class="call-avatar" id="callAvatar">DR</div>
+          <p id="callStatus">Connected • 00:00</p>
+        </div>
+
+        <div class="call-controls">
+          <button type="button" class="call-btn mute">Mute</button>
+          <button type="button" class="call-btn camera">Camera</button>
+          <button type="button" id="endCallBtn" class="call-btn end">
+            End Call
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        const modal = document.getElementById("callModal");
+        const doctorNode = document.getElementById("callDoctor");
+        const specialistNode = document.getElementById("callSpecialist");
+        const avatarNode = document.getElementById("callAvatar");
+        const statusNode = document.getElementById("callStatus");
+        const endButton = document.getElementById("endCallBtn");
+        let timerId = null;
+        let elapsed = 0;
+
+        function formatTime(totalSeconds) {
+          const minutes = String(Math.floor(totalSeconds / 60)).padStart(
+            2,
+            "0",
+          );
+          const seconds = String(totalSeconds % 60).padStart(2, "0");
+          return minutes + ":" + seconds;
+        }
+
+        function startTimer() {
+          elapsed = 0;
+          statusNode.textContent = "Connected • 00:00";
+          timerId = window.setInterval(function () {
+            elapsed += 1;
+            statusNode.textContent = "Connected • " + formatTime(elapsed);
+          }, 1000);
+        }
+
+        function stopTimer() {
+          if (timerId) {
+            window.clearInterval(timerId);
+            timerId = null;
+          }
+        }
+
+        function openCall(button) {
+          const doctor = button.getAttribute("data-doctor") || "Doctor";
+          const specialist =
+            button.getAttribute("data-specialist") || "Specialist";
+          const time = button.getAttribute("data-time") || "";
+          doctorNode.textContent = doctor;
+          specialistNode.textContent = specialist + (time ? " • " + time : "");
+          avatarNode.textContent = doctor
+            .replace("Dr. ", "")
+            .split(" ")
+            .slice(0, 2)
+            .map(function (part) {
+              return part.charAt(0).toUpperCase();
+            })
+            .join("");
+          modal.classList.add("show");
+          modal.setAttribute("aria-hidden", "false");
+          startTimer();
+        }
+
+        function closeCall() {
+          stopTimer();
+          modal.classList.remove("show");
+          modal.setAttribute("aria-hidden", "true");
+        }
+
+        document.querySelectorAll(".join-btn").forEach(function (button) {
+          button.addEventListener("click", function () {
+            openCall(button);
+          });
+        });
+
+        endButton.addEventListener("click", closeCall);
+        modal.addEventListener("click", function (event) {
+          if (event.target === modal) {
+            closeCall();
+          }
+        });
+      })();
+    </script>
   </body>
 </html>

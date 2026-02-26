@@ -1,0 +1,283 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Book Appointment - Doctors - MediConnect</title>
+    <link
+      rel="stylesheet"
+      href="{% static 'dashboard/css/patient-pages.css' %}"
+    />
+  </head>
+  <body>
+    <div class="patient-shell">
+      <aside class="sidebar">
+        <div class="brand-wrap">
+          <div class="brand-icon">~</div>
+          <div>
+            <h2>MediConnect</h2>
+            <p>PRO HEALTHCARE</p>
+          </div>
+        </div>
+
+        <nav class="side-nav" aria-label="Patient menu">
+          <a href="{% url 'patient_dashboard' %}" class="side-link"
+            >Dashboard</a
+          >
+          <a href="{% url 'patient_appointments' %}" class="side-link active"
+            >Book Appointment</a
+          >
+          <a href="{% url 'patient_prescriptions' %}" class="side-link"
+            >My Prescriptions</a
+          >
+        </nav>
+
+        <div class="sidebar-user">
+          <div class="avatar">{{ patient_name|slice:":2"|upper }}</div>
+          <div class="sidebar-user-meta">
+            <strong>{{ patient_name }}</strong>
+            <p>Patient</p>
+          </div>
+        </div>
+
+        <a href="{% url 'signout' %}" class="signout-btn">Sign Out</a>
+      </aside>
+
+      <main class="content">
+        <header class="top-header">
+          <div>
+            <h1>Book Appointment</h1>
+            <p>Welcome back to your health portal</p>
+          </div>
+          <button class="notify-btn" type="button" aria-label="Notifications">
+            🔔
+          </button>
+        </header>
+
+        <section class="patient-main">
+          <div class="page-head">
+            <div>
+              <h2>Appointments</h2>
+              <p>Manage your consultations and bookings</p>
+            </div>
+            <a href="{% url 'patient_appointments' %}" class="ghost-btn"
+              >Back to List</a
+            >
+          </div>
+
+          <div class="doctor-search">
+            <input
+              id="doctorSearchInput"
+              class="doctor-search-input"
+              type="text"
+              placeholder="Search by specialist or doctor name..."
+              aria-label="Search doctors by name or specialist"
+            />
+          </div>
+
+          <div class="booking-date-picker">
+            <label for="appointmentDateInput">Select Date</label>
+            <input
+              id="appointmentDateInput"
+              type="date"
+              class="booking-date-input"
+            />
+          </div>
+
+          <p id="doctorSearchResult" class="doctor-search-result"></p>
+
+          <div class="doctor-grid" id="doctorGrid">
+            {% for doctor in doctors %}
+            <article
+              class="doctor-card"
+              data-doctor-name="{{ doctor.name|lower }}"
+              data-specialist="{{ doctor.specialist|lower }}"
+            >
+              <div class="doctor-top">
+                <div class="doctor-photo" aria-hidden="true">
+                  {{ doctor.name|slice:"4:6"|upper }}
+                </div>
+                <div class="doctor-specialty-badge">
+                  {{ doctor.specialist }}
+                </div>
+                <div class="doctor-rating">
+                  ⭐ {{ doctor.rating }} <span>({{ doctor.reviews }})</span>
+                </div>
+              </div>
+              <div class="doctor-body">
+                <h4>{{ doctor.name }}</h4>
+                <p class="specialist">{{ doctor.specialist }}</p>
+                <p class="location">📍 {{ doctor.city }}</p>
+
+                <p class="available">AVAILABLE TODAY</p>
+                <div class="time-slots">
+                  <button
+                    type="button"
+                    class="time-slot-btn"
+                    data-doctor="{{ doctor.name }}"
+                    data-specialist="{{ doctor.specialist }}"
+                    data-city="{{ doctor.city }}"
+                    data-time="09:00 AM"
+                  >
+                    09:00 AM
+                  </button>
+                  <button
+                    type="button"
+                    class="time-slot-btn"
+                    data-doctor="{{ doctor.name }}"
+                    data-specialist="{{ doctor.specialist }}"
+                    data-city="{{ doctor.city }}"
+                    data-time="11:00 AM"
+                  >
+                    11:00 AM
+                  </button>
+                  <button
+                    type="button"
+                    class="time-slot-btn"
+                    data-doctor="{{ doctor.name }}"
+                    data-specialist="{{ doctor.specialist }}"
+                    data-city="{{ doctor.city }}"
+                    data-time="02:00 PM"
+                  >
+                    02:00 PM
+                  </button>
+                </div>
+              </div>
+            </article>
+            {% endfor %}
+          </div>
+
+          <script>
+            (function () {
+              const searchInput = document.getElementById("doctorSearchInput");
+              const resultText = document.getElementById("doctorSearchResult");
+              const dateInput = document.getElementById("appointmentDateInput");
+              const doctorCards = Array.from(
+                document.querySelectorAll("#doctorGrid .doctor-card"),
+              );
+              const slotButtons = Array.from(
+                document.querySelectorAll(".time-slot-btn"),
+              );
+              const appointmentsPageUrl = "{% url 'patient_appointments' %}";
+              const appointmentListStorageKey = "patientBookedAppointments";
+
+              function todayDateValue() {
+                const now = new Date();
+                const month = String(now.getMonth() + 1).padStart(2, "0");
+                const day = String(now.getDate()).padStart(2, "0");
+                return now.getFullYear() + "-" + month + "-" + day;
+              }
+
+              function buildDateLabelParts(isoDate) {
+                const chosenDate = isoDate
+                  ? new Date(isoDate + "T00:00:00")
+                  : new Date();
+                const months = [
+                  "JAN",
+                  "FEB",
+                  "MAR",
+                  "APR",
+                  "MAY",
+                  "JUN",
+                  "JUL",
+                  "AUG",
+                  "SEP",
+                  "OCT",
+                  "NOV",
+                  "DEC",
+                ];
+                const dayNumber = chosenDate.getDate();
+                return {
+                  label:
+                    months[chosenDate.getMonth()] +
+                    " " +
+                    String(dayNumber).padStart(2, "0"),
+                  day: dayNumber,
+                  isoDate: isoDate || todayDateValue(),
+                };
+              }
+
+              function loadAppointments() {
+                const raw = localStorage.getItem(appointmentListStorageKey);
+                if (!raw) {
+                  return [];
+                }
+                try {
+                  const parsed = JSON.parse(raw);
+                  return Array.isArray(parsed) ? parsed : [];
+                } catch (error) {
+                  return [];
+                }
+              }
+
+              dateInput.value = todayDateValue();
+
+              function runFilter() {
+                const term = searchInput.value.trim().toLowerCase();
+                let visibleCount = 0;
+
+                doctorCards.forEach(function (card) {
+                  const doctorName =
+                    card.getAttribute("data-doctor-name") || "";
+                  const specialist = card.getAttribute("data-specialist") || "";
+                  const isMatch =
+                    !term ||
+                    doctorName.includes(term) ||
+                    specialist.includes(term);
+                  card.style.display = isMatch ? "block" : "none";
+                  if (isMatch) {
+                    visibleCount += 1;
+                  }
+                });
+
+                if (!term) {
+                  resultText.textContent = "";
+                  return;
+                }
+
+                resultText.textContent =
+                  visibleCount > 0
+                    ? visibleCount + " doctor(s) found"
+                    : 'No doctors found for "' + searchInput.value.trim() + '"';
+              }
+
+              searchInput.addEventListener("input", runFilter);
+
+              slotButtons.forEach(function (button) {
+                button.addEventListener("click", function () {
+                  const selectedDate = dateInput.value || todayDateValue();
+                  const dateParts = buildDateLabelParts(selectedDate);
+                  const booking = {
+                    doctor: button.getAttribute("data-doctor") || "Doctor",
+                    specialist:
+                      button.getAttribute("data-specialist") || "Specialist",
+                    city: button.getAttribute("data-city") || "",
+                    time: button.getAttribute("data-time") || "",
+                    dateLabel: dateParts.label,
+                    day: dateParts.day,
+                    dateISO: dateParts.isoDate,
+                    mode: "Video Call",
+                    status: "CONFIRMED",
+                  };
+
+                  const existingAppointments = loadAppointments();
+                  existingAppointments.push(booking);
+                  localStorage.setItem(
+                    appointmentListStorageKey,
+                    JSON.stringify(existingAppointments),
+                  );
+                  localStorage.setItem(
+                    "patientBookedAppointment",
+                    JSON.stringify(booking),
+                  );
+                  window.location.href = appointmentsPageUrl;
+                });
+              });
+            })();
+          </script>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,352 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Book Appointment - MediConnect</title>
+    <link
+      rel="stylesheet"
+      href="{% static 'dashboard/css/patient-pages.css' %}"
+    />
+  </head>
+  <body>
+    <div class="patient-shell">
+      <aside class="sidebar">
+        <div class="brand-wrap">
+          <div class="brand-icon">~</div>
+          <div>
+            <h2>MediConnect</h2>
+            <p>PRO HEALTHCARE</p>
+          </div>
+        </div>
+
+        <nav class="side-nav" aria-label="Patient menu">
+          <a href="{% url 'patient_dashboard' %}" class="side-link"
+            >Dashboard</a
+          >
+          <a href="{% url 'patient_appointments' %}" class="side-link active"
+            >Book Appointment</a
+          >
+          <a href="{% url 'patient_prescriptions' %}" class="side-link"
+            >My Prescriptions</a
+          >
+        </nav>
+
+        <div class="sidebar-user">
+          <div class="avatar">{{ patient_name|slice:":2"|upper }}</div>
+          <div class="sidebar-user-meta">
+            <strong>{{ patient_name }}</strong>
+            <p>Patient</p>
+          </div>
+        </div>
+
+        <a href="{% url 'signout' %}" class="signout-btn">Sign Out</a>
+      </aside>
+
+      <main class="content">
+        <header class="top-header">
+          <div>
+            <h1>Book Appointment</h1>
+            <p>Welcome back to your health portal</p>
+          </div>
+          <button class="notify-btn" type="button" aria-label="Notifications">
+            🔔
+          </button>
+        </header>
+
+        <section class="patient-main">
+          <div class="page-head">
+            <div>
+              <h2>Appointments</h2>
+              <p>Manage your consultations and bookings</p>
+            </div>
+            <a
+              href="{% url 'patient_appointment_doctors' %}"
+              class="primary-btn"
+              >+&nbsp; Book New Appointment</a
+            >
+          </div>
+
+          <div class="booking-date-picker booking-date-picker-main">
+            <label for="appointmentFilterDate">Calendar</label>
+            <input
+              id="appointmentFilterDate"
+              type="date"
+              class="booking-date-input"
+            />
+          </div>
+
+          <section class="card-block">
+            <div class="card-block-head">
+              <h3>📅 Your Schedule</h3>
+            </div>
+
+            <div id="appointmentsList"></div>
+
+            <p
+              id="noAppointmentText"
+              class="no-appointment-text"
+              style="display: none"
+            >
+              No appointment booked yet. Click "Book New Appointment" and select
+              a time slot.
+            </p>
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <div id="callModal" class="call-modal" aria-hidden="true">
+      <div
+        class="call-card"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Video call popup"
+      >
+        <div class="call-top">
+          <div>
+            <h3 id="callDoctor">Doctor</h3>
+            <p id="callSpecialist">Specialist</p>
+          </div>
+          <span class="call-live">● Live</span>
+        </div>
+
+        <div class="call-video-area">
+          <div class="call-avatar" id="callAvatar">DR</div>
+          <p id="callStatus">Connected • 00:00</p>
+        </div>
+
+        <div class="call-controls">
+          <button type="button" class="call-btn mute">Mute</button>
+          <button type="button" class="call-btn camera">Camera</button>
+          <button type="button" id="endCallBtn" class="call-btn end">
+            End Call
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        const modal = document.getElementById("callModal");
+        const doctorNode = document.getElementById("callDoctor");
+        const specialistNode = document.getElementById("callSpecialist");
+        const avatarNode = document.getElementById("callAvatar");
+        const statusNode = document.getElementById("callStatus");
+        const endButton = document.getElementById("endCallBtn");
+        const appointmentsList = document.getElementById("appointmentsList");
+        const noAppointmentText = document.getElementById("noAppointmentText");
+        const filterDateInput = document.getElementById(
+          "appointmentFilterDate",
+        );
+        const appointmentListStorageKey = "patientBookedAppointments";
+        let timerId = null;
+        let elapsed = 0;
+
+        function escapeHtml(value) {
+          return String(value || "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/\"/g, "&quot;")
+            .replace(/'/g, "&#39;");
+        }
+
+        function loadAppointments() {
+          const rawList = localStorage.getItem(appointmentListStorageKey);
+          if (rawList) {
+            try {
+              const parsed = JSON.parse(rawList);
+              if (Array.isArray(parsed)) {
+                return parsed;
+              }
+            } catch (error) {
+              localStorage.removeItem(appointmentListStorageKey);
+            }
+          }
+
+          const legacyRaw = localStorage.getItem("patientBookedAppointment");
+          if (!legacyRaw) {
+            return [];
+          }
+
+          try {
+            const legacy = JSON.parse(legacyRaw);
+            const migrated = legacy ? [legacy] : [];
+            localStorage.setItem(
+              appointmentListStorageKey,
+              JSON.stringify(migrated),
+            );
+            return migrated;
+          } catch (error) {
+            localStorage.removeItem("patientBookedAppointment");
+            return [];
+          }
+        }
+
+        function saveAppointments(items) {
+          localStorage.setItem(
+            appointmentListStorageKey,
+            JSON.stringify(items),
+          );
+          if (items.length > 0) {
+            localStorage.setItem(
+              "patientBookedAppointment",
+              JSON.stringify(items[items.length - 1]),
+            );
+          } else {
+            localStorage.removeItem("patientBookedAppointment");
+          }
+        }
+
+        function renderAppointments() {
+          const appointments = loadAppointments();
+          const selectedDate = filterDateInput.value;
+          const indexedAppointments = appointments.map(
+            function (appointment, index) {
+              return { appointment: appointment, index: index };
+            },
+          );
+          const visibleAppointments = selectedDate
+            ? indexedAppointments.filter(function (item) {
+                return item.appointment.dateISO === selectedDate;
+              })
+            : indexedAppointments;
+
+          if (visibleAppointments.length === 0) {
+            appointmentsList.innerHTML = "";
+            if (appointments.length > 0 && selectedDate) {
+              noAppointmentText.textContent =
+                "No appointments found for selected date.";
+            } else {
+              noAppointmentText.textContent =
+                'No appointment booked yet. Click "Book New Appointment" and select a time slot.';
+            }
+            noAppointmentText.style.display = "block";
+            return;
+          }
+
+          noAppointmentText.style.display = "none";
+          appointmentsList.innerHTML = visibleAppointments
+            .map(function (item) {
+              const appointment = item.appointment;
+              const index = item.index;
+              return `
+                <article class="appointment-row" data-index="${index}">
+                  <div class="date-card">
+                    <span>${escapeHtml(appointment.dateLabel || "TODAY")}</span>
+                    <strong>${escapeHtml(appointment.day || "--")}</strong>
+                  </div>
+                  <div class="appointment-meta">
+                    <h4>${escapeHtml(appointment.doctor || "Doctor")}</h4>
+                    <p>${escapeHtml(appointment.specialist || "Specialist")}</p>
+                    <div class="chips">
+                      <span>🕘 ${escapeHtml(appointment.time || "--:--")}</span>
+                      <span>🎥 ${escapeHtml(appointment.mode || "Video Call")}</span>
+                    </div>
+                  </div>
+                  <span class="status-chip">✔ ${escapeHtml(appointment.status || "CONFIRMED")}</span>
+                  <button type="button" class="delete-btn" data-delete-index="${index}">Delete</button>
+                  <button
+                    type="button"
+                    class="join-btn"
+                    data-doctor="${escapeHtml(appointment.doctor || "Doctor")}"
+                    data-specialist="${escapeHtml(appointment.specialist || "Specialist")}"
+                    data-time="${escapeHtml(appointment.time || "")}" 
+                  >
+                    Join Call
+                  </button>
+                </article>
+              `;
+            })
+            .join("");
+        }
+
+        function formatTime(totalSeconds) {
+          const minutes = String(Math.floor(totalSeconds / 60)).padStart(
+            2,
+            "0",
+          );
+          const seconds = String(totalSeconds % 60).padStart(2, "0");
+          return minutes + ":" + seconds;
+        }
+
+        function startTimer() {
+          elapsed = 0;
+          statusNode.textContent = "Connected • 00:00";
+          timerId = window.setInterval(function () {
+            elapsed += 1;
+            statusNode.textContent = "Connected • " + formatTime(elapsed);
+          }, 1000);
+        }
+
+        function stopTimer() {
+          if (timerId) {
+            window.clearInterval(timerId);
+            timerId = null;
+          }
+        }
+
+        function openCall(button) {
+          const doctor = button.getAttribute("data-doctor") || "Doctor";
+          const specialist =
+            button.getAttribute("data-specialist") || "Specialist";
+          const time = button.getAttribute("data-time") || "";
+          doctorNode.textContent = doctor;
+          specialistNode.textContent = specialist + (time ? " • " + time : "");
+          avatarNode.textContent = doctor
+            .replace("Dr. ", "")
+            .split(" ")
+            .slice(0, 2)
+            .map(function (part) {
+              return part.charAt(0).toUpperCase();
+            })
+            .join("");
+          modal.classList.add("show");
+          modal.setAttribute("aria-hidden", "false");
+          startTimer();
+        }
+
+        function closeCall() {
+          stopTimer();
+          modal.classList.remove("show");
+          modal.setAttribute("aria-hidden", "true");
+        }
+
+        appointmentsList.addEventListener("click", function (event) {
+          const deleteButton = event.target.closest(".delete-btn");
+          if (deleteButton) {
+            const index = Number(
+              deleteButton.getAttribute("data-delete-index"),
+            );
+            const appointments = loadAppointments();
+            if (!Number.isNaN(index)) {
+              appointments.splice(index, 1);
+              saveAppointments(appointments);
+              closeCall();
+              renderAppointments();
+            }
+            return;
+          }
+
+          const joinButton = event.target.closest(".join-btn");
+          if (joinButton) {
+            openCall(joinButton);
+          }
+        });
+
+        endButton.addEventListener("click", closeCall);
+        modal.addEventListener("click", function (event) {
+          if (event.target === modal) {
+            closeCall();
+          }
+        });
+
+        filterDateInput.addEventListener("change", renderAppointments);
+
+        renderAppointments();
+      })();
+    </script>
+  </body>
+</html>

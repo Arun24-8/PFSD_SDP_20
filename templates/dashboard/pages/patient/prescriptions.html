@@ -1,0 +1,129 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Prescriptions - MediConnect</title>
+    <link
+      rel="stylesheet"
+      href="{% static 'dashboard/css/patient-pages.css' %}"
+    />
+  </head>
+  <body>
+    <div class="patient-shell">
+      <aside class="sidebar">
+        <div class="brand-wrap">
+          <div class="brand-icon">~</div>
+          <div>
+            <h2>MediConnect</h2>
+            <p>PRO HEALTHCARE</p>
+          </div>
+        </div>
+
+        <nav class="side-nav" aria-label="Patient menu">
+          <a href="{% url 'patient_dashboard' %}" class="side-link"
+            >Dashboard</a
+          >
+          <a href="{% url 'patient_appointments' %}" class="side-link"
+            >Book Appointment</a
+          >
+          <a href="{% url 'patient_prescriptions' %}" class="side-link active"
+            >My Prescriptions</a
+          >
+        </nav>
+
+        <div class="sidebar-user">
+          <div class="avatar">{{ patient_name|slice:":2"|upper }}</div>
+          <div class="sidebar-user-meta">
+            <strong>{{ patient_name }}</strong>
+            <p>Patient</p>
+          </div>
+        </div>
+
+        <a href="{% url 'signout' %}" class="signout-btn">Sign Out</a>
+      </aside>
+
+      <main class="content">
+        <header class="top-header">
+          <div>
+            <h1>My Prescriptions</h1>
+            <p>Welcome back to your health portal</p>
+          </div>
+          <button class="notify-btn" type="button" aria-label="Notifications">
+            🔔
+          </button>
+        </header>
+
+        <section class="patient-main">
+          <div class="page-head">
+            <div>
+              <h2>Prescriptions</h2>
+              <p>View and manage your medications</p>
+            </div>
+            <button type="button" class="ghost-btn">⟳ Request Refill</button>
+          </div>
+
+          <div class="search-wrap">
+            <div class="search-bar">
+              🔎 Search medications, diagnosis, or doctor...
+            </div>
+            <button class="filter-btn" type="button">⌄</button>
+          </div>
+
+          <div class="rx-grid">
+            <article class="rx-card">
+              <div class="rx-head">
+                <div>
+                  <h4>Dr. Kavitha Rao</h4>
+                  <p>Dermatology • Oct 10, 2023</p>
+                </div>
+                <span class="status-chip">ACTIVE</span>
+              </div>
+              <div class="diagnosis">Acute Eczema Flare-up</div>
+              <ul class="med-list">
+                <li>
+                  <strong>Amoxicillin 500mg</strong
+                  ><span>Take with food, every 8 hours.</span>
+                </li>
+                <li>
+                  <strong>Ibuprofen 400mg</strong
+                  ><span>Take with food, every 8 hours.</span>
+                </li>
+              </ul>
+              <div class="rx-actions">
+                <button class="record-btn" type="button">Open Record</button>
+                <button class="icon-btn" type="button">⇩</button>
+              </div>
+            </article>
+
+            <article class="rx-card">
+              <div class="rx-head">
+                <div>
+                  <h4>Dr. Rajesh Reddy</h4>
+                  <p>Cardiology • Sep 15, 2023</p>
+                </div>
+                <span class="status-chip">ACTIVE</span>
+              </div>
+              <div class="diagnosis">Hypertension</div>
+              <ul class="med-list">
+                <li>
+                  <strong>Atorvastatin 10mg</strong
+                  ><span>Take once daily before bed.</span>
+                </li>
+                <li>
+                  <strong>Aspirin 81mg</strong
+                  ><span>Take once daily before bed.</span>
+                </li>
+              </ul>
+              <div class="rx-actions">
+                <button class="record-btn" type="button">Open Record</button>
+                <button class="icon-btn" type="button">⇩</button>
+              </div>
+            </article>
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>
