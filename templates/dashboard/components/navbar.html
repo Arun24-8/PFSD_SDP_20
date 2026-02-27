@@ -16,6 +16,10 @@
       <span class="btn btn-outline">{{ admin_name }} (Admin)</span>
       <a href="{% url 'admin_dashboard' %}" class="btn btn-primary">Dashboard</a>
       <a href="{% url 'signout' %}" class="btn btn-outline">Sign Out</a>
+      {% elif doctor_name %}
+      <span class="btn btn-outline">Dr. {{ doctor_name }}</span>
+      <a href="{% url 'doctor_dashboard' %}" class="btn btn-primary">Dashboard</a>
+      <a href="{% url 'signout' %}" class="btn btn-outline">Sign Out</a>
       {% elif patient_name %}
       <span class="btn btn-outline">{{ patient_name }}</span>
       <a href="{% url 'patient_dashboard' %}" class="btn btn-primary">Dashboard</a>

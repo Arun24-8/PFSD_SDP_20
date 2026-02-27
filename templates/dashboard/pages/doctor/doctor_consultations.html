@@ -1,0 +1,33 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Consultations - MediConnect</title>
+    <link
+      rel="stylesheet"
+      href="{% static 'dashboard/css/doctor-pages.css' %}"
+    />
+  </head>
+  <body>
+    <div class="patient-shell doctor-shell">
+      {% include "dashboard/components/doctor_sidebar.html" %}
+      <main class="content">
+        <header class="top-header">
+          <div>
+            <h1>Consultations</h1>
+            <p>Overview of all consultations you've conducted or scheduled</p>
+          </div>
+          <button class="notify-btn" type="button" aria-label="Notifications">
+            <span>🔔</span>
+          </button>
+        </header>
+
+        <section class="dashboard-main">
+          <p>No consultation records yet. Once patients book or you create sessions, they will appear here.</p>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

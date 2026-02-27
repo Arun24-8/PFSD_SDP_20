@@ -16,29 +16,26 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from doctor.views import (
-    home,
-    features,
-    login,
-    signout,
-    patient_dashboard,
-    patient_appointments,
-    patient_appointment_doctors,
-    patient_prescriptions,
-)
+from doctor import views as doctor_views
 
 urlpatterns = [
-    path('', home, name='home'),
-    path('features/', features, name='features'),
-    path('login/', login, name='login'),
-    path('patient/dashboard/', patient_dashboard, name='patient_dashboard'),
-    path('patient/appointments/', patient_appointments,
+    path('', doctor_views.home, name='home'),
+    path('features/', doctor_views.features, name='features'),
+    path('login/', doctor_views.login, name='login'),
+    path('signout/', doctor_views.signout, name='signout'),
+
+    # patient routes
+    path('patient/dashboard/', doctor_views.patient_dashboard, name='patient_dashboard'),
+    path('patient/appointments/', doctor_views.patient_appointments,
          name='patient_appointments'),
-    path('patient/appointments/book/', patient_appointment_doctors,
+    path('patient/appointments/book/', doctor_views.patient_appointment_doctors,
          name='patient_appointment_doctors'),
-    path('patient/prescriptions/', patient_prescriptions,
+    path('patient/prescriptions/', doctor_views.patient_prescriptions,
          name='patient_prescriptions'),
+
+    # doctor app urls
+    path('doctor/', include('doctor.urls')),
+
     path('admin/', include('admin_management.urls')),
-    path('signout/', signout, name='signout'),
     path('admin-panel/', admin.site.urls),
 ]

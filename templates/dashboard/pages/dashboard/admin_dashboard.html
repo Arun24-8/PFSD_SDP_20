@@ -96,6 +96,53 @@
             </article>
           </div>
 
+          <!-- patient-dashboard-derived statistics -->
+          <div class="stats-grid">
+            <article class="stat-card">
+              <div class="stat-icon">📅</div>
+              <div class="stat-copy">
+                <h3>UPCOMING APPTS</h3>
+                <strong>{{ patient_stats.upcoming_appointments }}</strong>
+                <span>System wide</span>
+              </div>
+            </article>
+            <article class="stat-card">
+              <div class="stat-icon green">📄</div>
+              <div class="stat-copy">
+                <h3>ACTIVE RX</h3>
+                <strong>{{ patient_stats.active_prescriptions }}</strong>
+                <span>Total</span>
+              </div>
+            </article>
+            <article class="stat-card">
+              <div class="stat-icon purple">∿</div>
+              <div class="stat-copy">
+                <h3>TOTAL VISITS</h3>
+                <strong>{{ patient_stats.total_visits }}</strong>
+                <span>All time</span>
+              </div>
+            </article>
+          </div>
+
+          <div class="dashboard-grid">
+            <section class="panel">
+              <div class="panel-head">
+                <h3>Available Doctors</h3>
+                <a href="#">Manage</a>
+              </div>
+              {% for doc in doctor_list %}
+              <article class="schedule-card">
+                <div class="schedule-main">
+                  <h4>{{ doc.name }}</h4>
+                  <p>Rating: {{ doc.rating }}</p>
+                </div>
+              </article>
+              {% empty %}
+              <p>No doctors registered yet.</p>
+              {% endfor %}
+            </section>
+          </div>
+
           <div class="dashboard-grid">
             <section class="panel">
               <div class="panel-head">

@@ -1,0 +1,4 @@
+/* Doctor-specific dashboard styles import the existing dashboard stylesheet as a base */
+@import url('patient-dashboard.css');
+
+/* additional doctor dashboard overrides */

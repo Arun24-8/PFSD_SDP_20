@@ -1,0 +1,33 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>E-Prescriptions - MediConnect</title>
+    <link
+      rel="stylesheet"
+      href="{% static 'dashboard/css/doctor-pages.css' %}"
+    />
+  </head>
+  <body>
+    <div class="patient-shell doctor-shell">
+      {% include "dashboard/components/doctor_sidebar.html" %}
+      <main class="content">
+        <header class="top-header">
+          <div>
+            <h1>E-Prescriptions</h1>
+            <p>Manage electronic prescriptions you've issued</p>
+          </div>
+          <button class="notify-btn" type="button" aria-label="Notifications">
+            <span>🔔</span>
+          </button>
+        </header>
+
+        <section class="dashboard-main">
+          <p>No prescriptions have been generated yet.</p>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

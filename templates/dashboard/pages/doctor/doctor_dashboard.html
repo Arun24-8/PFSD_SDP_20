@@ -1,0 +1,74 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Doctor Dashboard - MediConnect</title>
+    <link
+      rel="stylesheet"
+      href="{% static 'dashboard/css/doctor-dashboard.css' %}"
+    />
+  </head>
+  <body>
+    <div class="patient-shell doctor-shell">
+      {% include "dashboard/components/doctor_sidebar.html" %}
+
+      <main class="content">
+        <header class="top-header">
+          <div>
+            <h1>Dashboard</h1>
+            <p>Access your doctor tools</p>
+          </div>
+          <button class="notify-btn" type="button" aria-label="Notifications">
+            <span>🔔</span>
+          </button>
+        </header>
+
+        <section class="dashboard-main">
+          <div class="welcome-head">
+            <div>
+              <h2>Welcome back, {{ doctor_name }}</h2>
+              <p>Manage your appointments and patients</p>
+            </div>
+            {% if rating %}
+            <div class="rating-display">
+              <span>⭐</span> <strong>{{ rating }}</strong> average rating
+            </div>
+            {% endif %}
+          </div>
+
+          <div class="dashboard-grid">
+            <section class="panel">
+              <div class="panel-head">
+                <h3>Your Schedule</h3>
+                <a href="#">View all</a>
+              </div>
+              {% for item in schedule %}
+              <article class="schedule-card">
+                <div class="date-chip">
+                  <span>{{ item.date_label }},</span>
+                  <strong>{{ item.month }}</strong>
+                </div>
+
+                <div class="schedule-main">
+                  <h4>{{ item.patient }}</h4>
+                  <p>{{ item.specialist }}</p>
+                  <div class="meta-chips">
+                    <span>{{ item.time }}</span>
+                    <span>{{ item.mode }}</span>
+                  </div>
+                </div>
+
+                <button type="button" class="join-btn" disabled>
+                  {% if item.mode == "Video Call" %}Join Call{% else %}Details{% endif %}
+                </button>
+              </article>
+              {% endfor %}
+            </section>
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

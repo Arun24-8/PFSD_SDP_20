@@ -16,6 +16,28 @@ def admin_dashboard(request):
         return redirect('login')
 
     admin_name = request.session.get("admin_name")
+
+    # sample aggregate data pulled from patient dashboard idea
+    from doctor.models import Doctor
+    from django.db import utils as db_utils
+
+    SAMPLE_PATIENT_STATS = {
+        'upcoming_appointments': 20,
+        'active_prescriptions': 45,
+        'total_visits': 1023,
+    }
+
+    SAMPLE_APPOINTMENT_PREVIEW = [
+        {'date_label': 'TODAY', 'month': 'Feb', 'doctor': 'Dr. A. Roy', 'time': '09:00 AM'},
+        {'date_label': 'TOMORROW', 'month': 'Feb', 'doctor': 'Dr. N. Singh', 'time': '11:30 AM'},
+    ]
+
+    # dynamic list of doctors (guard against missing table)
+    try:
+        doctor_list = list(Doctor.objects.values('name', 'rating'))
+    except db_utils.OperationalError:
+        doctor_list = []
+
     context = {
         'admin_profile': {
             'user': {
@@ -23,6 +45,9 @@ def admin_dashboard(request):
                 'last_name': ' '.join(admin_name.split()[1:]) if len(admin_name.split()) > 1 else ''
             }
         },
+        'patient_stats': SAMPLE_PATIENT_STATS,
+        'appointment_preview': SAMPLE_APPOINTMENT_PREVIEW,
+        'doctor_list': doctor_list,
     }
     return render(request, 'dashboard/pages/dashboard/admin_dashboard.html', context)
 

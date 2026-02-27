@@ -1,0 +1,33 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Notifications - MediConnect</title>
+    <link
+      rel="stylesheet"
+      href="{% static 'dashboard/css/doctor-pages.css' %}"
+    />
+  </head>
+  <body>
+    <div class="patient-shell doctor-shell">
+      {% include "dashboard/components/doctor_sidebar.html" %}
+      <main class="content">
+        <header class="top-header">
+          <div>
+            <h1>Notifications</h1>
+            <p>View your alerts and messages</p>
+          </div>
+          <button class="notify-btn" type="button" aria-label="Notifications">
+            <span>🔔</span>
+          </button>
+        </header>
+
+        <section class="dashboard-main">
+          <p>You have no new notifications.</p>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>
