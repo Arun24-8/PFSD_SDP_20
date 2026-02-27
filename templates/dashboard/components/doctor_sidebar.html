@@ -1,4 +1,5 @@
-{% comment %} Common sidebar for doctor area. Expects `active` and `doctor_name` in context. {% endcomment %}
+{% comment %} Common sidebar for doctor area. Expects `active` and `doctor_name`
+in context. {% endcomment %}
 <aside class="sidebar">
   <div class="brand-wrap">
     <div class="brand-icon">~</div>
@@ -9,14 +10,31 @@
   </div>
 
   <nav class="side-nav" aria-label="Doctor menu">
-    <a href="{% url 'doctor_dashboard' %}" class="side-link {% if active == 'dashboard' %}active{% endif %}">Dashboard</a>
-    <a href="{% url 'doctor_appointments' %}" class="side-link {% if active == 'appointments' %}active{% endif %}">Appointments</a>
-    <a href="{% url 'doctor_patients' %}" class="side-link {% if active == 'patients' %}active{% endif %}">Patients</a>
-    <a href="{% url 'doctor_consultations' %}" class="side-link {% if active == 'consultations' %}active{% endif %}">Consultations</a>
-    <a href="{% url 'doctor_e_prescriptions' %}" class="side-link {% if active == 'e_prescriptions' %}active{% endif %}">E-Prescriptions</a>
-    <a href="{% url 'doctor_notifications' %}" class="side-link {% if active == 'notifications' %}active{% endif %}">Notifications</a>
-    <a href="{% url 'doctor_reports' %}" class="side-link {% if active == 'reports' %}active{% endif %}">Reports</a>
-    <a href="{% url 'doctor_profile' %}" class="side-link {% if active == 'profile' %}active{% endif %}">Profile & Settings</a>
+    <a
+      href="{% url 'doctor_dashboard' %}"
+      class="side-link {% if active == 'dashboard' %}active{% endif %}"
+      >Dashboard</a
+    >
+    <a
+      href="{% url 'doctor_appointments' %}"
+      class="side-link {% if active == 'appointments' %}active{% endif %}"
+      >Appointments</a
+    >
+    <a
+      href="{% url 'doctor_patients' %}"
+      class="side-link {% if active == 'patients' %}active{% endif %}"
+      >Patients</a
+    >
+    <a
+      href="{% url 'doctor_e_prescriptions' %}"
+      class="side-link {% if active == 'e_prescriptions' %}active{% endif %}"
+      >E-Prescriptions</a
+    >
+    <a
+      href="{% url 'doctor_reports' %}"
+      class="side-link {% if active == 'reports' %}active{% endif %}"
+      >Reports</a
+    >
   </nav>
 
   <div class="sidebar-user">

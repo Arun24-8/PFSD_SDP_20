@@ -25,8 +25,40 @@
           </button>
         </header>
 
-        <section class="dashboard-main">
-          <p>You don’t have any appointments yet. This view will eventually list upcoming consultations and requests.</p>
+        <section class="patient-main">
+          <div class="page-head">
+            <div>
+              <h2>Upcoming Appointments</h2>
+              <p>Track your confirmed and pending consultations</p>
+            </div>
+            <button type="button" class="ghost-btn">+ Add Slot</button>
+          </div>
+
+          <section class="card-block">
+            <div class="card-block-head">
+              <h3>Consultation Schedule</h3>
+            </div>
+
+            {% for appointment in appointments %}
+            <article class="appointment-row">
+              <div class="date-card">
+                <span>{{ appointment.date_label }}</span>
+                <strong>{{ appointment.day }}</strong>
+              </div>
+              <div class="appointment-meta">
+                <h4>{{ appointment.patient }}</h4>
+                <p>{{ appointment.reason }}</p>
+                <div class="chips">
+                  <span>🕘 {{ appointment.time }}</span>
+                  <span>📍 {{ appointment.mode }}</span>
+                </div>
+              </div>
+              <span class="status-chip">{{ appointment.status }}</span>
+              <button type="button" class="delete-btn">Reschedule</button>
+              <button type="button" class="join-btn">Open</button>
+            </article>
+            {% endfor %}
+          </section>
         </section>
       </main>
     </div>

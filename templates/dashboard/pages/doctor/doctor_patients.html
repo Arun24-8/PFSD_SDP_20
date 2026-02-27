@@ -25,8 +25,46 @@
           </button>
         </header>
 
-        <section class="dashboard-main">
-          <p>No patient records available yet. Patients you consult will appear here.</p>
+        <section class="patient-main">
+          <div class="page-head">
+            <div>
+              <h2>Patient Directory</h2>
+              <p>Review active cases and follow-up requirements</p>
+            </div>
+            <button type="button" class="ghost-btn">Export List</button>
+          </div>
+
+          <div class="search-wrap">
+            <div class="search-bar">🔎 Search patient name or condition...</div>
+            <button class="filter-btn" type="button">⌄</button>
+          </div>
+
+          <section class="card-block">
+            <div class="card-block-head">
+              <h3>Assigned Patients</h3>
+            </div>
+
+            {% for patient in patients %}
+            <article class="appointment-row">
+              <div class="date-card">
+                <span>{{ patient.risk }}</span>
+                <strong>{{ patient.name|slice:":2"|upper }}</strong>
+              </div>
+              <div class="appointment-meta">
+                <h4>{{ patient.name }}</h4>
+                <p>{{ patient.condition }}</p>
+                <div class="chips">
+                  <span>🎂 {{ patient.age }} years</span>
+                  <span>👤 {{ patient.gender }}</span>
+                  <span>📅 Last Visit: {{ patient.last_visit }}</span>
+                </div>
+              </div>
+              <span class="status-chip">{{ patient.risk }}</span>
+              <button type="button" class="delete-btn">Follow-Up</button>
+              <button type="button" class="join-btn">View</button>
+            </article>
+            {% endfor %}
+          </section>
         </section>
       </main>
     </div>

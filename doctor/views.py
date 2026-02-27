@@ -49,7 +49,6 @@ PATIENT_BOOKING_DOCTORS = [
 ]
 
 
-
 def _name_from_email(email):
     local_part = (email or "").split("@", 1)[0].strip()
     cleaned = re.sub(r"[._-]+", " ", local_part)
@@ -57,19 +56,11 @@ def _name_from_email(email):
     return normalized.title() if normalized else "Patient"
 
 
-
 def home(request):
-    patient_name = request.session.get("patient_name")
-    admin_name = request.session.get("admin_name")
-    doctor_name = request.session.get("doctor_name")
     return render(
         request,
         "dashboard/pages/doctor/home.html",
-        {
-            "patient_name": patient_name,
-            "admin_name": admin_name,
-            "doctor_name": doctor_name,
-        },
+        {},
     )
 
 
@@ -155,7 +146,8 @@ def login(request):
             request.session["doctor_name"] = doctor_name
             # ensure a Doctor record exists with a rating; pick random if new
             try:
-                doctor_obj, created = Doctor.objects.get_or_create(name=doctor_name)
+                doctor_obj, created = Doctor.objects.get_or_create(
+                    name=doctor_name)
                 if created:
                     doctor_obj.rating = round(random.uniform(4.0, 5.0), 2)
                     doctor_obj.save()
@@ -195,6 +187,134 @@ DOCTOR_SCHEDULE = [
         "specialist": "Dermatology",
         "time": "02:30 PM",
         "mode": "Video Call",
+    },
+]
+
+DOCTOR_APPOINTMENTS = [
+    {
+        "date_label": "MON",
+        "day": "04",
+        "patient": "Arun Kumar",
+        "reason": "Follow-up for hypertension",
+        "time": "09:30 AM",
+        "mode": "In-Person",
+        "status": "CONFIRMED",
+    },
+    {
+        "date_label": "MON",
+        "day": "04",
+        "patient": "Meera Nair",
+        "reason": "Diabetes medication review",
+        "time": "11:00 AM",
+        "mode": "Video Call",
+        "status": "UPCOMING",
+    },
+    {
+        "date_label": "TUE",
+        "day": "05",
+        "patient": "Rahul Verma",
+        "reason": "Post-surgery check",
+        "time": "02:30 PM",
+        "mode": "In-Person",
+        "status": "CONFIRMED",
+    },
+    {
+        "date_label": "WED",
+        "day": "06",
+        "patient": "Anitha Reddy",
+        "reason": "General consultation",
+        "time": "04:15 PM",
+        "mode": "Video Call",
+        "status": "PENDING",
+    },
+]
+
+DOCTOR_PATIENTS = [
+    {
+        "name": "Arun Kumar",
+        "age": 42,
+        "gender": "Male",
+        "condition": "Hypertension",
+        "last_visit": "2026-02-25",
+        "risk": "Stable",
+    },
+    {
+        "name": "Meera Nair",
+        "age": 35,
+        "gender": "Female",
+        "condition": "Type-2 Diabetes",
+        "last_visit": "2026-02-21",
+        "risk": "Monitor",
+    },
+    {
+        "name": "Rahul Verma",
+        "age": 58,
+        "gender": "Male",
+        "condition": "Cardiac Recovery",
+        "last_visit": "2026-02-20",
+        "risk": "Priority",
+    },
+    {
+        "name": "Sana Shaik",
+        "age": 29,
+        "gender": "Female",
+        "condition": "Migraine",
+        "last_visit": "2026-02-18",
+        "risk": "Stable",
+    },
+]
+
+DOCTOR_E_PRESCRIPTIONS = [
+    {
+        "patient": "Arun Kumar",
+        "date": "Feb 25, 2026",
+        "diagnosis": "Primary Hypertension",
+        "status": "ACTIVE",
+        "medicines": [
+            {"name": "Amlodipine 5mg", "note": "Once daily after breakfast"},
+            {"name": "Telmisartan 40mg", "note": "Once daily at night"},
+        ],
+    },
+    {
+        "patient": "Meera Nair",
+        "date": "Feb 21, 2026",
+        "diagnosis": "Type-2 Diabetes Management",
+        "status": "ACTIVE",
+        "medicines": [
+            {"name": "Metformin 500mg", "note": "Twice daily with meals"},
+            {"name": "Glimepiride 1mg", "note": "Once daily before breakfast"},
+        ],
+    },
+    {
+        "patient": "Sana Shaik",
+        "date": "Feb 18, 2026",
+        "diagnosis": "Migraine Episode",
+        "status": "REVIEW",
+        "medicines": [
+            {"name": "Sumatriptan 50mg", "note": "As needed for severe episodes"},
+            {"name": "Naproxen 250mg", "note": "After food, if pain persists"},
+        ],
+    },
+]
+
+DOCTOR_REPORTS = [
+    {
+        "title": "Weekly Consultations",
+        "period": "Week 9, 2026",
+        "summary": "18 completed • 2 rescheduled",
+        "metric": "90% completion",
+    },
+    {
+        "title": "Prescription Compliance",
+        "period": "Last 30 days",
+        "summary": "74% patients followed medication plan",
+        "metric": "High adherence",
+    },
+    {
+        "title": "Patient Follow-ups",
+        "period": "Last 14 days",
+        "summary": "11 follow-ups completed",
+        "metric": "2 pending",
     },
 ]
 
@@ -241,7 +361,11 @@ def doctor_appointments(request):
     return render(
         request,
         "dashboard/pages/doctor/doctor_appointments.html",
-        {"doctor_name": doctor_name, "active": "appointments"},
+        {
+            "doctor_name": doctor_name,
+            "active": "appointments",
+            "appointments": DOCTOR_APPOINTMENTS,
+        },
     )
 
 
@@ -253,19 +377,11 @@ def doctor_patients(request):
     return render(
         request,
         "dashboard/pages/doctor/doctor_patients.html",
-        {"doctor_name": doctor_name, "active": "patients"},
-    )
-
-
-def doctor_consultations(request):
-    doctor_name = request.session.get("doctor_name")
-    if not doctor_name:
-        return redirect("login")
-
-    return render(
-        request,
-        "dashboard/pages/doctor/doctor_consultations.html",
-        {"doctor_name": doctor_name, "active": "consultations"},
+        {
+            "doctor_name": doctor_name,
+            "active": "patients",
+            "patients": DOCTOR_PATIENTS,
+        },
     )
 
 
@@ -277,19 +393,11 @@ def doctor_e_prescriptions(request):
     return render(
         request,
         "dashboard/pages/doctor/doctor_e_prescriptions.html",
-        {"doctor_name": doctor_name, "active": "e_prescriptions"},
-    )
-
-
-def doctor_notifications(request):
-    doctor_name = request.session.get("doctor_name")
-    if not doctor_name:
-        return redirect("login")
-
-    return render(
-        request,
-        "dashboard/pages/doctor/doctor_notifications.html",
-        {"doctor_name": doctor_name, "active": "notifications"},
+        {
+            "doctor_name": doctor_name,
+            "active": "e_prescriptions",
+            "prescriptions": DOCTOR_E_PRESCRIPTIONS,
+        },
     )
 
 
@@ -301,19 +409,16 @@ def doctor_reports(request):
     return render(
         request,
         "dashboard/pages/doctor/doctor_reports.html",
-        {"doctor_name": doctor_name, "active": "reports"},
-    )
-
-
-def doctor_profile(request):
-    doctor_name = request.session.get("doctor_name")
-    if not doctor_name:
-        return redirect("login")
-
-    return render(
-        request,
-        "dashboard/pages/doctor/doctor_profile.html",
-        {"doctor_name": doctor_name, "active": "profile"},
+        {
+            "doctor_name": doctor_name,
+            "active": "reports",
+            "reports": DOCTOR_REPORTS,
+            "report_totals": {
+                "consultations": len(DOCTOR_APPOINTMENTS),
+                "patients": len(DOCTOR_PATIENTS),
+                "prescriptions": len(DOCTOR_E_PRESCRIPTIONS),
+            },
+        },
     )
 
 

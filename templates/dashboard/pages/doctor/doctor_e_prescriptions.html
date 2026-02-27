@@ -24,8 +24,44 @@
           </button>
         </header>
 
-        <section class="dashboard-main">
-          <p>No prescriptions have been generated yet.</p>
+        <section class="patient-main">
+          <div class="page-head">
+            <div>
+              <h2>Issued Prescriptions</h2>
+              <p>Maintain medication plans with quick access</p>
+            </div>
+            <button type="button" class="ghost-btn">+ New Prescription</button>
+          </div>
+
+          <div class="rx-grid">
+            {% for prescription in prescriptions %}
+            <article class="rx-card">
+              <div class="rx-head">
+                <div>
+                  <h4>{{ prescription.patient }}</h4>
+                  <p>{{ prescription.date }}</p>
+                </div>
+                <span class="status-chip">{{ prescription.status }}</span>
+              </div>
+
+              <div class="diagnosis">{{ prescription.diagnosis }}</div>
+
+              <ul class="med-list">
+                {% for medicine in prescription.medicines %}
+                <li>
+                  <strong>{{ medicine.name }}</strong>
+                  <span>{{ medicine.note }}</span>
+                </li>
+                {% endfor %}
+              </ul>
+
+              <div class="rx-actions">
+                <button class="record-btn" type="button">Open Record</button>
+                <button class="icon-btn" type="button">⇩</button>
+              </div>
+            </article>
+            {% endfor %}
+          </div>
         </section>
       </main>
     </div>

@@ -17,15 +17,91 @@
         <header class="top-header">
           <div>
             <h1>Reports</h1>
-            <p>View system and patient reports</p>
+            <p>View consultation and treatment insights</p>
           </div>
           <button class="notify-btn" type="button" aria-label="Notifications">
             <span>🔔</span>
           </button>
         </header>
 
-        <section class="dashboard-main">
-          <p>Report functionality is not yet implemented.</p>
+        <section class="patient-main">
+          <div class="page-head">
+            <div>
+              <h2>Performance Reports</h2>
+              <p>Track your patient outcomes and service activity</p>
+            </div>
+            <button type="button" class="ghost-btn">Generate Report</button>
+          </div>
+
+          <section class="card-block">
+            <div class="card-block-head">
+              <h3>Quick Summary</h3>
+            </div>
+
+            <article class="appointment-row">
+              <div class="date-card">
+                <span>Total</span>
+                <strong>{{ report_totals.consultations }}</strong>
+              </div>
+              <div class="appointment-meta">
+                <h4>Consultations</h4>
+                <p>Planned appointments in your schedule</p>
+              </div>
+              <span class="status-chip">Updated</span>
+              <button type="button" class="join-btn">View</button>
+            </article>
+
+            <article class="appointment-row">
+              <div class="date-card">
+                <span>Total</span>
+                <strong>{{ report_totals.patients }}</strong>
+              </div>
+              <div class="appointment-meta">
+                <h4>Patients</h4>
+                <p>Active patients under your care</p>
+              </div>
+              <span class="status-chip">Updated</span>
+              <button type="button" class="join-btn">View</button>
+            </article>
+
+            <article class="appointment-row">
+              <div class="date-card">
+                <span>Total</span>
+                <strong>{{ report_totals.prescriptions }}</strong>
+              </div>
+              <div class="appointment-meta">
+                <h4>E-Prescriptions</h4>
+                <p>Prescriptions generated for your patients</p>
+              </div>
+              <span class="status-chip">Updated</span>
+              <button type="button" class="join-btn">View</button>
+            </article>
+          </section>
+
+          <section class="card-block">
+            <div class="card-block-head">
+              <h3>Recent Report Entries</h3>
+            </div>
+
+            {% for report in reports %}
+            <article class="appointment-row">
+              <div class="date-card">
+                <span>Period</span>
+                <strong>{{ forloop.counter }}</strong>
+              </div>
+              <div class="appointment-meta">
+                <h4>{{ report.title }}</h4>
+                <p>{{ report.period }}</p>
+                <div class="chips">
+                  <span>📊 {{ report.summary }}</span>
+                  <span>⭐ {{ report.metric }}</span>
+                </div>
+              </div>
+              <span class="status-chip">Ready</span>
+              <button type="button" class="join-btn">Open</button>
+            </article>
+            {% endfor %}
+          </section>
         </section>
       </main>
     </div>
