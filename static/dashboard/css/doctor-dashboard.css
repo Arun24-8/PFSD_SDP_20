@@ -2,3 +2,87 @@
 @import url('patient-dashboard.css');
 
 /* additional doctor dashboard overrides */
+
+/* dashboard card refinements */
+.schedule-card {
+	padding: 20px 22px;
+	display: grid;
+	grid-template-columns: 92px 1fr auto;
+	align-items: center;
+	gap: 18px;
+	transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.schedule-card:hover {
+	transform: translateY(-4px);
+	box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+}
+
+.date-chip {
+	border-radius: 14px;
+	background: linear-gradient(180deg, #eaf6fb, #f6fbfd);
+	text-align: center;
+	padding: 12px 8px;
+	min-width: 84px;
+}
+
+.date-chip span {
+	display: block;
+	color: #0f9fc6;
+	font-size: 11px;
+	font-weight: 800;
+}
+
+.date-chip strong {
+	display: block;
+	margin-top: 6px;
+	font-size: 18px;
+	color: #11324a;
+}
+
+.schedule-main h4 { font-size: 16px; margin-bottom: 4px; }
+.schedule-main p { font-size: 12px; margin: 0 0 8px; }
+
+.meta-chips span { font-size: 11px; padding: 6px 10px; }
+
+/* actions */
+.details-btn {
+	border: 1px solid #d3dce7;
+	background: #ffffff;
+	color: #334155;
+	border-radius: 12px;
+	padding: 9px 12px;
+	font-weight: 700;
+	font-size: 12px;
+	cursor: pointer;
+}
+
+.join-btn {
+	border: 1px solid #cfd8e3;
+	background: #ffffff;
+	color: #0c1934;
+	border-radius: 12px;
+	padding: 9px 14px;
+	font-weight: 800;
+	font-size: 12px;
+	cursor: pointer;
+	transition: background 0.12s ease, color 0.12s ease, transform 0.12s ease;
+}
+
+.join-btn.join-enabled {
+	background: #ef4444; /* red */
+	color: #ffffff;
+	border-color: #d43b3b;
+}
+
+.join-btn:active { transform: translateY(1px); }
+
+/* appointments panel tweaks */
+.panel.section-appointments .panel-head h3 { margin-bottom: 6px; }
+.panel.section-appointments article.schedule-card { margin-bottom: 12px; }
+
+@media (max-width: 1100px) {
+	.dashboard-grid { grid-template-columns: 1fr; }
+	.schedule-card { grid-template-columns: 1fr; align-items: flex-start; }
+	.date-chip { display: inline-flex; align-items: center; gap: 8px; }
+}

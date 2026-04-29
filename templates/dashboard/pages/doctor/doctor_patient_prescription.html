@@ -126,14 +126,14 @@
               {% for slot in timing_slots %}
               <div class="timing-item {% if slot.checked %}checked{% endif %}">
                 <span>{{ slot.label }}</span>
-                <span class="timing-mark">
-                  {% if slot.checked %}✓{% else %}○{% endif %}
-                </span>
+                <span class="timing-mark"
+                  >{% if slot.checked %}✓{% else %}○{% endif %}</span
+                >
               </div>
               {% endfor %}
             </div>
-            {% endif %} {% if prescriptions %} {% for prescription in
-            prescriptions %}
+
+            {% for prescription in prescriptions %}
             <article class="appointment-row">
               <div class="appointment-meta">
                 <h4>{{ prescription.diagnosis }}</h4>

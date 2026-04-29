@@ -39,7 +39,7 @@
           </div>
 
           <div class="dashboard-grid">
-            <section class="panel">
+            <section class="panel section-appointments">
               <div class="panel-head">
                 <h3>Your Schedule</h3>
                 <a href="#">View all</a>
@@ -60,9 +60,59 @@
                   </div>
                 </div>
 
-                <button type="button" class="join-btn" disabled>
-                  {% if item.mode == "Video Call" %}Join Call{% else %}Details{% endif %}
+                <button
+                  type="button"
+                  class="details-btn"
+                  onclick="location.href='{% url 'doctor_pending_patient_detail' forloop.counter0 %}'"
+                >
+                  Details
                 </button>
+              </article>
+              {% endfor %}
+            </section>
+
+            <section class="panel">
+              <div class="panel-head">
+                <h3>Your Appointments</h3>
+                <a href="{% url 'doctor_appointments' %}">View all</a>
+              </div>
+              {% for appt in appointments %}
+              <article class="schedule-card">
+                <div class="date-chip">
+                  <span>{{ appt.date_label }}</span>
+                  <strong>{{ appt.day }} {{ appt.month }}</strong>
+                </div>
+
+                <div class="schedule-main">
+                  <h4>{{ appt.patient }}</h4>
+                  <p>{{ appt.reason }}</p>
+                  <div class="meta-chips">
+                    <span>{{ appt.time }}</span>
+                    <span>{{ appt.mode }}</span>
+                  </div>
+                </div>
+
+                <div style="display: flex; gap: 8px; align-items: center">
+                  <button
+                    type="button"
+                    class="details-btn"
+                    onclick="location.href='{% url 'doctor_pending_patient_detail' appt.appointment_index %}'"
+                  >
+                    Details
+                  </button>
+
+                  <form
+                    method="get"
+                    action="{% url 'doctor_join_call' appt.appointment_index %}"
+                  >
+                    <button
+                      type="submit"
+                      class="join-btn {% if appt.join_enabled %}join-enabled{% endif %}"
+                    >
+                      Join Call
+                    </button>
+                  </form>
+                </div>
               </article>
               {% endfor %}
             </section>

@@ -1,8 +1,14 @@
+from .models import Doctor
 import re
 import random
 
 from django.shortcuts import render, redirect
-from .models import Doctor
+from datetime import datetime
+
+MONTH_MAP = {
+    'JAN': 'Jan', 'FEB': 'Feb', 'MAR': 'Mar', 'APR': 'Apr', 'MAY': 'May', 'JUN': 'Jun',
+    'JUL': 'Jul', 'AUG': 'Aug', 'SEP': 'Sep', 'OCT': 'Oct', 'NOV': 'Nov', 'DEC': 'Dec'
+}
 
 
 PATIENT_BOOKING_DOCTORS = [
@@ -371,6 +377,34 @@ def doctor_dashboard(request):
         else:
             raise
 
+    # prepare appointments for dashboard: enable join when appointment time
+    # matches current local time (to the minute)
+    now = datetime.now()
+    appointments_for_dashboard = []
+    for idx, appt in enumerate(DOCTOR_APPOINTMENTS):
+        item = appt.copy()
+        item["appointment_index"] = idx
+        # Build a parseable datetime string if date parts are present
+        join_enabled = False
+        try:
+            day = item.get("day")
+            month = item.get("month")
+            year = item.get("year")
+            time_str = item.get("time")
+            if day and month and year and time_str:
+                month_short = MONTH_MAP.get(month.upper(), month)
+                dt_str = f"{day} {month_short} {year} {time_str}"
+                appt_dt = datetime.strptime(dt_str, "%d %b %Y %I:%M %p")
+                # join when date+time matches current to the minute
+                if appt_dt.strftime("%d %b %Y %I:%M %p") == now.strftime("%d %b %Y %I:%M %p"):
+                    join_enabled = True
+        except Exception:
+            join_enabled = False
+
+        item["join_enabled"] = join_enabled
+        item["join_color"] = "red" if join_enabled else "white"
+        appointments_for_dashboard.append(item)
+
     return render(
         request,
         "dashboard/pages/doctor/doctor_dashboard.html",
@@ -379,6 +413,46 @@ def doctor_dashboard(request):
             "active": "dashboard",
             "rating": rating,
             "schedule": DOCTOR_SCHEDULE,
+            "appointments": appointments_for_dashboard,
+        },
+    )
+
+
+def doctor_join_call(request, appointment_index):
+    doctor_name = request.session.get("doctor_name")
+    if not doctor_name:
+        return redirect("login")
+
+    if not (0 <= appointment_index < len(DOCTOR_APPOINTMENTS)):
+        return redirect("doctor_dashboard")
+
+    appointment = DOCTOR_APPOINTMENTS[appointment_index]
+    # Determine if join is allowed (same logic as dashboard)
+    now = datetime.now()
+    join_allowed = False
+    try:
+        day = appointment.get("day")
+        month = appointment.get("month")
+        year = appointment.get("year")
+        time_str = appointment.get("time")
+        if day and month and year and time_str:
+            month_short = MONTH_MAP.get(month.upper(), month)
+            dt_str = f"{day} {month_short} {year} {time_str}"
+            appt_dt = datetime.strptime(dt_str, "%d %b %Y %I:%M %p")
+            if appt_dt.strftime("%d %b %Y %I:%M %p") == now.strftime("%d %b %Y %I:%M %p"):
+                join_allowed = True
+    except Exception:
+        join_allowed = False
+
+    # In a real app we'd redirect to a video call provider / room.
+    # Here render a simple page that simulates joining the call.
+    return render(
+        request,
+        "dashboard/pages/doctor/join_call.html",
+        {
+            "doctor_name": doctor_name,
+            "appointment": appointment,
+            "join_allowed": join_allowed,
         },
     )
 

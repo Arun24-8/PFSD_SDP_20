@@ -1,0 +1,51 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Joining Call - MediConnect</title>
+    <link
+      rel="stylesheet"
+      href="{% static 'dashboard/css/doctor-dashboard.css' %}"
+    />
+  </head>
+  <body>
+    <div class="patient-shell doctor-shell">
+      {% include "dashboard/components/doctor_sidebar.html" %}
+
+      <main class="content">
+        <header class="top-header">
+          <div>
+            <h1>Join Call</h1>
+          </div>
+        </header>
+
+        <section class="dashboard-main">
+          <div class="panel">
+            <h3>Joining Call for {{ appointment.patient }}</h3>
+            {% if join_allowed %}
+            <p style="color: green; font-weight: bold">
+              You may now join the video call.
+            </p>
+            <p>
+              Simulated call started — in a real deployment this would redirect
+              to the video room.
+            </p>
+            {% else %}
+            <p style="color: darkred; font-weight: bold">
+              Call is not currently available. The join button is enabled only
+              at appointment time.
+            </p>
+            <p>
+              Appointment time: {{ appointment.day }} {{ appointment.month }} {{
+              appointment.year }} {{ appointment.time }}
+            </p>
+            {% endif %}
+            <p><a href="{% url 'doctor_dashboard' %}">Back to dashboard</a></p>
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

@@ -13,6 +13,8 @@ urlpatterns = [
          name='doctor_reject_appointment'),
     path('appointments/<int:appointment_index>/view/', views.doctor_pending_patient_detail,
          name='doctor_pending_patient_detail'),
+    path('appointments/<int:appointment_index>/join/', views.doctor_join_call,
+         name='doctor_join_call'),
     path('patients/', views.doctor_patients, name='doctor_patients'),
     path('patients/<int:patient_index>/', views.doctor_patient_detail,
          name='doctor_patient_detail'),
