@@ -2,9 +2,22 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+    path('', views.home, name='doctor_home'),
     path('dashboard/', views.doctor_dashboard, name='doctor_dashboard'),
     path('appointments/', views.doctor_appointments, name='doctor_appointments'),
+    path('appointments/user-pendings/', views.doctor_user_pendings,
+         name='doctor_user_pendings'),
+    path('appointments/<int:appointment_index>/accept/', views.doctor_accept_appointment,
+         name='doctor_accept_appointment'),
+    path('appointments/<int:appointment_index>/reject/', views.doctor_reject_appointment,
+         name='doctor_reject_appointment'),
+    path('appointments/<int:appointment_index>/view/', views.doctor_pending_patient_detail,
+         name='doctor_pending_patient_detail'),
     path('patients/', views.doctor_patients, name='doctor_patients'),
+    path('patients/<int:patient_index>/', views.doctor_patient_detail,
+         name='doctor_patient_detail'),
+    path('patients/<int:patient_index>/prescription/', views.doctor_patient_prescription,
+         name='doctor_patient_prescription'),
     path('e-prescriptions/', views.doctor_e_prescriptions,
          name='doctor_e_prescriptions'),
     path('reports/', views.doctor_reports, name='doctor_reports'),

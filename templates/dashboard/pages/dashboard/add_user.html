@@ -1,0 +1,168 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Add Doctor - MediConnect</title>
+    <link
+      rel="stylesheet"
+      href="{% static 'dashboard/css/admin-dashboard.css' %}"
+    />
+  </head>
+  <body>
+    <div class="admin-shell">
+      <aside class="sidebar">
+        <div class="brand-wrap">
+          <div class="brand-icon">⚙</div>
+          <div>
+            <h2>MediConnect</h2>
+            <p>ADMIN PANEL</p>
+          </div>
+        </div>
+
+        <nav class="side-nav" aria-label="Admin menu">
+          <a href="/admin/dashboard/" class="side-link">Dashboard</a>
+          <a href="/admin/manage-users/" class="side-link active"
+            >Manage Users</a
+          >
+          <a href="/admin/reports/" class="side-link">Reports</a>
+          <a href="/admin/security/" class="side-link">Security</a>
+        </nav>
+
+        <div class="sidebar-user">
+          <div class="avatar admin-avatar">A</div>
+          <div class="sidebar-user-meta">
+            <strong>Administrator</strong>
+            <p>Admin</p>
+          </div>
+        </div>
+
+        <a href="{% url 'signout' %}" class="signout-btn">Sign Out</a>
+      </aside>
+
+      <main class="content">
+        <header class="top-header">
+          <div>
+            <h1>Add New Doctor</h1>
+            <p>Create a doctor account from a dedicated page</p>
+          </div>
+          <a href="{% url 'manage_users' %}" class="btn-secondary-link">Back</a>
+        </header>
+
+        <section class="dashboard-main">
+          <section
+            class="panel user-form-panel"
+            aria-label="Create doctor form"
+          >
+            <div class="panel-head">
+              <h3>Create Doctor</h3>
+              <p>Enter doctor details and temporary login password</p>
+            </div>
+
+            {% if messages %}
+            <div class="form-messages" aria-live="polite">
+              {% for message in messages %}
+              <div
+                class="form-alert {% if message.tags %}{{ message.tags }}{% endif %}"
+              >
+                {{ message }}
+              </div>
+              {% endfor %}
+            </div>
+            {% endif %}
+
+            <form
+              class="user-create-form"
+              method="post"
+              action="{% url 'add_user' %}"
+            >
+              {% csrf_token %}
+              <div class="user-form-grid">
+                <div class="user-field-group">
+                  <label for="first_name">First Name *</label>
+                  <input
+                    id="first_name"
+                    name="first_name"
+                    type="text"
+                    placeholder="Enter first name"
+                    required
+                  />
+                </div>
+
+                <div class="user-field-group">
+                  <label for="last_name">Last Name</label>
+                  <input
+                    id="last_name"
+                    name="last_name"
+                    type="text"
+                    placeholder="Enter last name"
+                  />
+                </div>
+
+                <div class="user-field-group">
+                  <label for="email">Email *</label>
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    placeholder="Enter email address"
+                    required
+                  />
+                </div>
+
+                <div class="user-field-group">
+                  <label for="phone">Phone Number</label>
+                  <input
+                    id="phone"
+                    name="phone"
+                    type="text"
+                    placeholder="Enter phone number"
+                  />
+                </div>
+
+                <div class="user-field-group">
+                  <label for="status">Status</label>
+                  <select id="status" name="status">
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                    <option value="suspended">Suspended</option>
+                  </select>
+                </div>
+
+                <div class="user-field-group">
+                  <label for="password">Temporary Password *</label>
+                  <input
+                    id="password"
+                    name="password"
+                    type="password"
+                    placeholder="Create temporary password"
+                    required
+                  />
+                </div>
+
+                <div class="user-field-group">
+                  <label for="confirm_password">Confirm Password *</label>
+                  <input
+                    id="confirm_password"
+                    name="confirm_password"
+                    type="password"
+                    placeholder="Confirm temporary password"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div class="user-form-actions">
+                <a href="{% url 'manage_users' %}" class="btn-secondary-link"
+                  >Cancel</a
+                >
+                <button type="submit" class="primary-btn">Create Doctor</button>
+              </div>
+            </form>
+          </section>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

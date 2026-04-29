@@ -1,0 +1,63 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reschedule Appointment - MediConnect</title>
+    <link
+      rel="stylesheet"
+      href="{% static 'dashboard/css/doctor-pages.css' %}"
+    />
+  </head>
+  <body>
+    <div class="patient-shell doctor-shell">
+      {% include "dashboard/components/doctor_sidebar.html" %}
+
+      <main class="content">
+        <header class="top-header">
+          <div>
+            <h1>Reschedule</h1>
+            <p>Update appointment date/time</p>
+          </div>
+        </header>
+
+        <section class="patient-main">
+          <div class="page-head">
+            <div>
+              <h2>Reschedule Appointment</h2>
+            </div>
+            <a href="{% url 'doctor_appointments' %}" class="ghost-btn">Back</a>
+          </div>
+
+          <section class="panel">
+            {% if appt %}
+            <form method="post">
+              {% csrf_token %}
+              <div class="form-row">
+                <label>Date label</label>
+                <input
+                  type="text"
+                  name="date_label"
+                  value="{{ appt.date_label }}"
+                />
+              </div>
+              <div class="form-row">
+                <label>Time</label>
+                <input type="text" name="time" value="{{ appt.time }}" />
+              </div>
+              <div class="form-actions">
+                <button class="primary-btn" type="submit">Save</button>
+              </div>
+            </form>
+            {% else %}
+            <div class="panel-head">
+              <h3>Appointment not found</h3>
+            </div>
+            {% endif %}
+          </section>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

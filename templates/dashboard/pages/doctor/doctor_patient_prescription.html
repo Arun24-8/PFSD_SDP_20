@@ -1,0 +1,215 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Patient Prescription - MediConnect</title>
+    <link
+      rel="stylesheet"
+      href="{% static 'dashboard/css/doctor-pages.css' %}"
+    />
+    <style>
+      .timing-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+        gap: 12px;
+        margin: 14px 0 22px;
+      }
+
+      .timing-item {
+        border: 1px solid #d2ddea;
+        border-radius: 12px;
+        padding: 10px 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: #f8fbff;
+      }
+
+      .timing-mark {
+        font-weight: 700;
+        color: #94a3b8;
+      }
+
+      .timing-item.checked .timing-mark {
+        color: #16a34a;
+      }
+
+      .medicine-list {
+        display: grid;
+        gap: 12px;
+        margin-top: 12px;
+      }
+
+      .medicine-card {
+        border: 1px solid #d2ddea;
+        border-radius: 12px;
+        padding: 14px;
+        background: #ffffff;
+      }
+
+      .medicine-card h5 {
+        margin: 0 0 10px;
+        font-size: 16px;
+        color: #1e293b;
+      }
+
+      .medicine-ticks {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+        gap: 8px;
+      }
+
+      .medicine-tick {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        font-size: 13px;
+        color: #475569;
+        padding: 8px 10px;
+        border-radius: 10px;
+        background: #f8fbff;
+        border: 1px solid #e2e8f0;
+      }
+
+      .medicine-tick span:last-child {
+        font-weight: 700;
+        color: #94a3b8;
+      }
+
+      .medicine-tick.checked span:last-child {
+        color: #16a34a;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="patient-shell doctor-shell">
+      {% include "dashboard/components/doctor_sidebar.html" %}
+
+      <main class="content">
+        <header class="top-header">
+          <div>
+            <h1>Prescription</h1>
+            <p>Doctor-written prescription for the selected patient</p>
+          </div>
+          <a
+            class="notify-btn"
+            aria-label="Notifications"
+            href="{% url 'doctor_reports' %}"
+          >
+            <span>🔔</span>
+          </a>
+        </header>
+
+        <section class="patient-main">
+          <div class="page-head">
+            <div>
+              <h2>
+                {% if patient %} {{ patient.name }} {% else %} Patient
+                Prescription {% endif %}
+              </h2>
+            </div>
+            <a href="{% url 'doctor_patients' %}" class="ghost-btn"
+              >Back to Patients</a
+            >
+          </div>
+
+          <section class="card-block">
+            <div class="card-block-head">
+              <h3>Prescription Details</h3>
+            </div>
+
+            {% if prescriptions %}
+            <div class="timing-grid" aria-label="Medication timing checklist">
+              {% for slot in timing_slots %}
+              <div class="timing-item {% if slot.checked %}checked{% endif %}">
+                <span>{{ slot.label }}</span>
+                <span class="timing-mark">
+                  {% if slot.checked %}✓{% else %}○{% endif %}
+                </span>
+              </div>
+              {% endfor %}
+            </div>
+            {% endif %} {% if prescriptions %} {% for prescription in
+            prescriptions %}
+            <article class="appointment-row">
+              <div class="appointment-meta">
+                <h4>{{ prescription.diagnosis }}</h4>
+                <div class="chips">
+                  <span>📅 {{ prescription.date }}</span>
+                  <span>📌 {{ prescription.status }}</span>
+                </div>
+                <div class="medicine-list">
+                  {% for medicine in prescription.medicines_display %}
+                  <div class="medicine-card">
+                    <h5>{{ medicine.name }}</h5>
+                    <div class="medicine-ticks">
+                      <div
+                        class="medicine-tick {% if medicine.timing_flags.before_breakfast %}checked{% endif %}"
+                      >
+                        <span>Before Breakfast</span>
+                        <span
+                          >{% if medicine.timing_flags.before_breakfast %}✓{%
+                          else %}○{% endif %}</span
+                        >
+                      </div>
+                      <div
+                        class="medicine-tick {% if medicine.timing_flags.after_breakfast %}checked{% endif %}"
+                      >
+                        <span>After Breakfast</span>
+                        <span
+                          >{% if medicine.timing_flags.after_breakfast %}✓{%
+                          else %}○{% endif %}</span
+                        >
+                      </div>
+                      <div
+                        class="medicine-tick {% if medicine.timing_flags.lunch %}checked{% endif %}"
+                      >
+                        <span>Lunch</span>
+                        <span
+                          >{% if medicine.timing_flags.lunch %}✓{% else %}○{%
+                          endif %}</span
+                        >
+                      </div>
+                      <div
+                        class="medicine-tick {% if medicine.timing_flags.before_dinner %}checked{% endif %}"
+                      >
+                        <span>Before Dinner</span>
+                        <span
+                          >{% if medicine.timing_flags.before_dinner %}✓{% else
+                          %}○{% endif %}</span
+                        >
+                      </div>
+                      <div
+                        class="medicine-tick {% if medicine.timing_flags.after_dinner %}checked{% endif %}"
+                      >
+                        <span>After Dinner</span>
+                        <span
+                          >{% if medicine.timing_flags.after_dinner %}✓{% else
+                          %}○{% endif %}</span
+                        >
+                      </div>
+                    </div>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+            </article>
+            {% endfor %} {% else %}
+            <article class="appointment-row">
+              <div class="appointment-meta">
+                <h4>No prescription available</h4>
+                <p>
+                  Doctor has not written a prescription for this patient yet.
+                </p>
+              </div>
+            </article>
+            {% endif %}
+          </section>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

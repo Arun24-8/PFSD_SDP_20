@@ -1,0 +1,154 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "git-reflog-recovery",
+			"type": "shell",
+			"command": "git",
+			"args": [
+				"reflog",
+				"--date=iso"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "compare-recovery-commits",
+			"type": "shell",
+			"command": "git",
+			"args": [
+				"show",
+				"--stat",
+				"--oneline",
+				"--no-patch",
+				"1873161",
+				"e88c6e3"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "verify-recovery-head",
+			"type": "shell",
+			"command": "git",
+			"args": [
+				"log",
+				"-1",
+				"--oneline",
+				"--decorate"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "move-recovery-branch",
+			"type": "shell",
+			"command": "git checkout main; git branch -f recovery-branch 1873161; git checkout recovery-branch; git log -1 --oneline --decorate",
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "force-move-recovery-branch",
+			"type": "shell",
+			"command": "git branch -f recovery-branch 1873161; git log -1 --oneline recovery-branch",
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "django-check-doctor-ui",
+			"type": "shell",
+			"command": "py",
+			"args": [
+				"-3",
+				"manage.py",
+				"check"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "django-check-user-pendings",
+			"type": "shell",
+			"command": "py",
+			"args": [
+				"-3",
+				"manage.py",
+				"check"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "django-check-pending-dot",
+			"type": "shell",
+			"command": "py",
+			"args": [
+				"-3",
+				"manage.py",
+				"check"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "django-check-after-patient-flow",
+			"type": "shell",
+			"command": "py",
+			"args": [
+				"-3",
+				"manage.py",
+				"check"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "django-check-prescription-button",
+			"type": "shell",
+			"command": "py",
+			"args": [
+				"-3",
+				"manage.py",
+				"check"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "django-check-timing-checklist",
+			"type": "shell",
+			"command": "py",
+			"args": [
+				"-3",
+				"manage.py",
+				"check"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "django-check-prescription-ticks",
+			"type": "shell",
+			"command": "py",
+			"args": [
+				"-3",
+				"manage.py",
+				"check"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		}
+	]
+}

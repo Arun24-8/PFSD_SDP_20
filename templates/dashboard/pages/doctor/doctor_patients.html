@@ -58,10 +58,19 @@
                   <span>👤 {{ patient.gender }}</span>
                   <span>📅 Last Visit: {{ patient.last_visit }}</span>
                 </div>
+                <p>💊 {{ patient.prescription_summary }}</p>
               </div>
               <span class="status-chip">{{ patient.risk }}</span>
-              <button type="button" class="delete-btn">Follow-Up</button>
-              <button type="button" class="join-btn">View</button>
+              <a
+                href="{% url 'doctor_patient_prescription' forloop.counter0 %}"
+                class="ghost-btn"
+                >Prescription</a
+              >
+              <a
+                href="{% url 'doctor_patient_detail' forloop.counter0 %}"
+                class="join-btn"
+                >View</a
+              >
             </article>
             {% endfor %}
           </section>

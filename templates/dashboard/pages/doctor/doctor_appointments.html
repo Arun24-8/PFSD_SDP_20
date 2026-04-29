@@ -9,6 +9,22 @@
       rel="stylesheet"
       href="{% static 'dashboard/css/doctor-pages.css' %}"
     />
+    <style>
+      .pending-link {
+        position: relative;
+      }
+
+      .pending-dot {
+        position: absolute;
+        top: -6px;
+        right: -6px;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #ef4444;
+        box-shadow: 0 0 0 2px #ffffff;
+      }
+    </style>
   </head>
   <body>
     <div class="patient-shell doctor-shell">
@@ -31,7 +47,14 @@
               <h2>Upcoming Appointments</h2>
               <p>Track your confirmed and pending consultations</p>
             </div>
-            <button type="button" class="ghost-btn">+ Add Slot</button>
+            <a
+              href="{% url 'doctor_user_pendings' %}"
+              class="ghost-btn pending-link"
+            >
+              User Pendings {% if pending_count > 0 %}
+              <span class="pending-dot" aria-hidden="true"></span>
+              {% endif %}
+            </a>
           </div>
 
           <section class="card-block">
@@ -54,8 +77,21 @@
                 </div>
               </div>
               <span class="status-chip">{{ appointment.status }}</span>
-              <button type="button" class="delete-btn">Reschedule</button>
-              <button type="button" class="join-btn">Open</button>
+              <a
+                href="{% url 'doctor_pending_patient_detail' appointment.appointment_index %}"
+                class="join-btn"
+                >Open</a
+              >
+            </article>
+            {% empty %}
+            <article class="appointment-row">
+              <div class="appointment-meta">
+                <h4>No active appointments</h4>
+                <p>
+                  Completed appointments are hidden here. Patients will appear
+                  again after booking a new slot.
+                </p>
+              </div>
             </article>
             {% endfor %}
           </section>

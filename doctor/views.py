@@ -194,37 +194,67 @@ DOCTOR_APPOINTMENTS = [
     {
         "date_label": "MON",
         "day": "04",
+        "month": "APR",
+        "year": "2026",
         "patient": "Arun Kumar",
         "reason": "Follow-up for hypertension",
         "time": "09:30 AM",
         "mode": "In-Person",
-        "status": "CONFIRMED",
+        "status": "COMPLETED",
     },
     {
         "date_label": "MON",
         "day": "04",
+        "month": "APR",
+        "year": "2026",
         "patient": "Meera Nair",
         "reason": "Diabetes medication review",
         "time": "11:00 AM",
         "mode": "Video Call",
-        "status": "UPCOMING",
+        "status": "COMPLETED",
     },
     {
         "date_label": "TUE",
         "day": "05",
+        "month": "APR",
+        "year": "2026",
         "patient": "Rahul Verma",
         "reason": "Post-surgery check",
         "time": "02:30 PM",
         "mode": "In-Person",
-        "status": "CONFIRMED",
+        "status": "COMPLETED",
     },
     {
         "date_label": "WED",
         "day": "06",
+        "month": "APR",
+        "year": "2026",
         "patient": "Anitha Reddy",
         "reason": "General consultation",
         "time": "04:15 PM",
         "mode": "Video Call",
+        "status": "PENDING",
+    },
+    {
+        "date_label": "THU",
+        "day": "07",
+        "month": "APR",
+        "year": "2026",
+        "patient": "Sana Shaik",
+        "reason": "Migraine follow-up",
+        "time": "10:45 AM",
+        "mode": "Video Call",
+        "status": "PENDING",
+    },
+    {
+        "date_label": "FRI",
+        "day": "08",
+        "month": "APR",
+        "year": "2026",
+        "patient": "Meera Nair",
+        "reason": "Diabetes quarterly review",
+        "time": "03:00 PM",
+        "mode": "In-Person",
         "status": "PENDING",
     },
 ]
@@ -358,13 +388,108 @@ def doctor_appointments(request):
     if not doctor_name:
         return redirect("login")
 
+    pending_count = 0
+    active_appointments = []
+    for appointment_index, appointment in enumerate(DOCTOR_APPOINTMENTS):
+        if appointment.get("status") == "PENDING":
+            pending_count += 1
+        if appointment.get("status") in {"COMPLETED", "REJECTED"}:
+            continue
+
+        item = appointment.copy()
+        item["appointment_index"] = appointment_index
+        active_appointments.append(item)
+
     return render(
         request,
         "dashboard/pages/doctor/doctor_appointments.html",
         {
             "doctor_name": doctor_name,
             "active": "appointments",
-            "appointments": DOCTOR_APPOINTMENTS,
+            "appointments": active_appointments,
+            "pending_count": pending_count,
+        },
+    )
+
+
+def doctor_user_pendings(request):
+    doctor_name = request.session.get("doctor_name")
+    if not doctor_name:
+        return redirect("login")
+
+    reminders = []
+    for appointment_index, appointment in enumerate(DOCTOR_APPOINTMENTS):
+        if appointment.get("status") == "PENDING":
+            item = appointment.copy()
+            item["appointment_index"] = appointment_index
+            reminders.append(item)
+
+    return render(
+        request,
+        "dashboard/pages/doctor/doctor_reminders.html",
+        {
+            "doctor_name": doctor_name,
+            "active": "appointments",
+            "reminders": reminders,
+        },
+    )
+
+
+def doctor_accept_appointment(request, appointment_index):
+    doctor_name = request.session.get("doctor_name")
+    if not doctor_name:
+        return redirect("login")
+
+    if request.method == "POST" and 0 <= appointment_index < len(DOCTOR_APPOINTMENTS):
+        DOCTOR_APPOINTMENTS[appointment_index]["status"] = "CONFIRMED"
+
+    return redirect("doctor_user_pendings")
+
+
+def doctor_reject_appointment(request, appointment_index):
+    doctor_name = request.session.get("doctor_name")
+    if not doctor_name:
+        return redirect("login")
+
+    if request.method == "POST" and 0 <= appointment_index < len(DOCTOR_APPOINTMENTS):
+        DOCTOR_APPOINTMENTS[appointment_index]["status"] = "REJECTED"
+
+    return redirect("doctor_user_pendings")
+
+
+def doctor_pending_patient_detail(request, appointment_index):
+    doctor_name = request.session.get("doctor_name")
+    if not doctor_name:
+        return redirect("login")
+
+    patient = None
+    if 0 <= appointment_index < len(DOCTOR_APPOINTMENTS):
+        appointment = DOCTOR_APPOINTMENTS[appointment_index]
+        appointment_patient_name = appointment.get(
+            "patient", "").strip().lower()
+
+        for known_patient in DOCTOR_PATIENTS:
+            if known_patient.get("name", "").strip().lower() == appointment_patient_name:
+                patient = known_patient
+                break
+
+        if patient is None:
+            patient = {
+                "name": appointment.get("patient", "Patient"),
+                "age": "N/A",
+                "gender": "N/A",
+                "condition": appointment.get("reason", "Pending consultation"),
+                "last_visit": "N/A",
+                "risk": "Pending",
+            }
+
+    return render(
+        request,
+        "dashboard/pages/doctor/doctor_patient_detail.html",
+        {
+            "doctor_name": doctor_name,
+            "active": "appointments",
+            "patient": patient,
         },
     )
 
@@ -374,13 +499,150 @@ def doctor_patients(request):
     if not doctor_name:
         return redirect("login")
 
+    prescription_map = {}
+    for prescription in DOCTOR_E_PRESCRIPTIONS:
+        patient_key = prescription.get("patient", "").strip().lower()
+        medicine_names = [
+            medicine.get("name", "")
+            for medicine in prescription.get("medicines", [])
+            if medicine.get("name")
+        ]
+        summary = ", ".join(
+            medicine_names) if medicine_names else "No medicines listed"
+        prescription_map[patient_key] = f"{prescription.get('diagnosis', 'Prescription')}: {summary}"
+
+    patient_cards = []
+    for patient in DOCTOR_PATIENTS:
+        item = patient.copy()
+        patient_key = patient.get("name", "").strip().lower()
+        item["prescription_summary"] = prescription_map.get(
+            patient_key,
+            "No e-prescription available",
+        )
+        patient_cards.append(item)
+
     return render(
         request,
         "dashboard/pages/doctor/doctor_patients.html",
         {
             "doctor_name": doctor_name,
             "active": "patients",
-            "patients": DOCTOR_PATIENTS,
+            "patients": patient_cards,
+        },
+    )
+
+
+def doctor_patient_detail(request, patient_index):
+    doctor_name = request.session.get("doctor_name")
+    if not doctor_name:
+        return redirect("login")
+
+    patient = None
+    if 0 <= patient_index < len(DOCTOR_PATIENTS):
+        patient = DOCTOR_PATIENTS[patient_index]
+
+    return render(
+        request,
+        "dashboard/pages/doctor/doctor_patient_detail.html",
+        {
+            "doctor_name": doctor_name,
+            "active": "patients",
+            "patient": patient,
+        },
+    )
+
+
+def doctor_patient_prescription(request, patient_index):
+    doctor_name = request.session.get("doctor_name")
+    if not doctor_name:
+        return redirect("login")
+
+    patient = None
+    prescriptions = []
+    prescriptions_display = []
+    timing_status = {
+        "before_breakfast": False,
+        "after_breakfast": False,
+        "lunch": False,
+        "before_dinner": False,
+        "after_dinner": False,
+    }
+
+    if 0 <= patient_index < len(DOCTOR_PATIENTS):
+        patient = DOCTOR_PATIENTS[patient_index]
+        patient_key = patient.get("name", "").strip().lower()
+
+        for prescription in DOCTOR_E_PRESCRIPTIONS:
+            if prescription.get("patient", "").strip().lower() == patient_key:
+                prescriptions.append(prescription)
+
+    def _timing_flags(note):
+        normalized = (note or "").strip().lower()
+        return {
+            "before_breakfast": "before breakfast" in normalized or "empty stomach" in normalized,
+            "after_breakfast": "after breakfast" in normalized,
+            "lunch": "lunch" in normalized,
+            "before_dinner": "before dinner" in normalized,
+            "after_dinner": "after dinner" in normalized or "at night" in normalized,
+        }
+
+    for prescription in prescriptions:
+        display_prescription = prescription.copy()
+        display_medicines = []
+        for medicine in prescription.get("medicines", []):
+            flags = _timing_flags(medicine.get("note", ""))
+
+            if flags["before_breakfast"]:
+                timing_status["before_breakfast"] = True
+            if flags["after_breakfast"]:
+                timing_status["after_breakfast"] = True
+            if flags["lunch"]:
+                timing_status["lunch"] = True
+            if flags["before_dinner"]:
+                timing_status["before_dinner"] = True
+            if flags["after_dinner"]:
+                timing_status["after_dinner"] = True
+
+            display_medicines.append({
+                "name": medicine.get("name", "Medicine"),
+                "timing_flags": flags,
+            })
+
+        display_prescription["medicines_display"] = display_medicines
+        prescriptions_display.append(display_prescription)
+
+    timing_slots = [
+        {
+            "label": "Before Breakfast",
+            "checked": timing_status["before_breakfast"],
+        },
+        {
+            "label": "After Breakfast",
+            "checked": timing_status["after_breakfast"],
+        },
+        {
+            "label": "Lunch",
+            "checked": timing_status["lunch"],
+        },
+        {
+            "label": "Before Dinner",
+            "checked": timing_status["before_dinner"],
+        },
+        {
+            "label": "After Dinner",
+            "checked": timing_status["after_dinner"],
+        },
+    ]
+
+    return render(
+        request,
+        "dashboard/pages/doctor/doctor_patient_prescription.html",
+        {
+            "doctor_name": doctor_name,
+            "active": "patients",
+            "patient": patient,
+            "prescriptions": prescriptions_display,
+            "timing_slots": timing_slots,
         },
     )
 

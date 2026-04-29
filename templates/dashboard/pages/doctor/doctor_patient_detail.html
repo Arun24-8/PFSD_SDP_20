@@ -1,0 +1,74 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Patient Details - MediConnect</title>
+    <link
+      rel="stylesheet"
+      href="{% static 'dashboard/css/doctor-pages.css' %}"
+    />
+  </head>
+  <body>
+    <div class="patient-shell doctor-shell">
+      {% include "dashboard/components/doctor_sidebar.html" %}
+
+      <main class="content">
+        <header class="top-header">
+          <div>
+            <h1>Patient Details</h1>
+            <p>Patient information and recent activity</p>
+          </div>
+          <a
+            class="notify-btn"
+            aria-label="Notifications"
+            href="{% url 'doctor_reports' %}"
+          >
+            <span>🔔</span>
+          </a>
+        </header>
+
+        <section class="patient-main">
+          <div class="page-head">
+            <div>
+              <h2>Details</h2>
+            </div>
+            <div style="display: flex; gap: 10px">
+              <a href="{% url 'doctor_patients' %}" class="ghost-btn"
+                >Patients</a
+              >
+              <a href="{% url 'doctor_appointments' %}" class="ghost-btn"
+                >Back to Appointments</a
+              >
+            </div>
+          </div>
+
+          <section class="panel">
+            {% if patient %}
+            <div class="panel-head">
+              <h3>{{ patient.name }}</h3>
+              <p>{{ patient.condition }}</p>
+            </div>
+
+            <div class="patient-details">
+              <ul>
+                <li><strong>Age:</strong> {{ patient.age }}</li>
+                <li><strong>Gender:</strong> {{ patient.gender }}</li>
+                <li><strong>Condition:</strong> {{ patient.condition }}</li>
+                <li><strong>Last Visit:</strong> {{ patient.last_visit }}</li>
+                <li><strong>Risk:</strong> {{ patient.risk }}</li>
+              </ul>
+            </div>
+
+            {% else %}
+            <div class="panel-head">
+              <h3>Patient not found</h3>
+            </div>
+            {% endif %}
+          </section>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

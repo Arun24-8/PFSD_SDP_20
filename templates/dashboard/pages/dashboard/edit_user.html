@@ -1,0 +1,217 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Edit User - MediConnect</title>
+    <link
+      rel="stylesheet"
+      href="{% static 'dashboard/css/admin-dashboard.css' %}"
+    />
+    <link rel="stylesheet" href="{% static 'dashboard/css/add-user.css' %}" />
+  </head>
+  <body>
+    <div class="admin-shell">
+      <aside class="sidebar">
+        <div class="brand-wrap">
+          <div class="brand-icon">⚙</div>
+          <div>
+            <h2>MediConnect</h2>
+            <p>ADMIN PANEL</p>
+          </div>
+        </div>
+
+        <nav class="side-nav" aria-label="Admin menu">
+          <a href="/admin/dashboard/" class="side-link">Dashboard</a>
+          <a href="/admin/manage-users/" class="side-link active"
+            >Manage Users</a
+          >
+          <a href="/admin/reports/" class="side-link">Reports</a>
+          <a href="/admin/security/" class="side-link">Security</a>
+        </nav>
+
+        <div class="sidebar-user">
+          <div class="avatar admin-avatar">A</div>
+          <div class="sidebar-user-meta">
+            <strong>Administrator</strong>
+            <p>Admin</p>
+          </div>
+        </div>
+
+        <a href="{% url 'signout' %}" class="signout-btn">Sign Out</a>
+      </aside>
+
+      <main class="content">
+        <header class="top-header">
+          <div>
+            <h1>Edit User</h1>
+            <p>Update account details and access</p>
+          </div>
+          <a href="{% url 'manage_users' %}" class="btn-secondary-link">Back</a>
+        </header>
+
+        <section class="dashboard-main">
+          <section class="panel user-form-panel" aria-label="Edit user form">
+            <div class="panel-head">
+              <h3>Edit {{ user_obj.first_name }} {{ user_obj.last_name }}</h3>
+              <p>Update details and role</p>
+            </div>
+
+            {% if messages %}
+            <div class="form-messages" aria-live="polite">
+              {% for message in messages %}
+              <div
+                class="form-alert {% if message.tags %}{{ message.tags }}{% endif %}"
+              >
+                {{ message }}
+              </div>
+              {% endfor %}
+            </div>
+            {% endif %}
+
+            <form
+              class="user-create-form"
+              method="post"
+              action="{% url 'edit_user' user_obj.id %}"
+            >
+              {% csrf_token %}
+              <div class="user-form-grid">
+                <div class="user-field-group">
+                  <label for="first_name">First Name *</label>
+                  <input
+                    id="first_name"
+                    name="first_name"
+                    type="text"
+                    value="{{ user_obj.first_name }}"
+                    required
+                  />
+                </div>
+
+                <div class="user-field-group">
+                  <label for="last_name">Last Name</label>
+                  <input
+                    id="last_name"
+                    name="last_name"
+                    type="text"
+                    value="{{ user_obj.last_name }}"
+                  />
+                </div>
+
+                <div class="user-field-group">
+                  <label for="email">Email *</label>
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    value="{{ user_obj.email }}"
+                    required
+                  />
+                </div>
+
+                <div class="user-field-group">
+                  <label for="role">Role *</label>
+                  <select id="role" name="role" required>
+                    <option
+                      value="admin"
+                      {%
+                      if
+                      role=""
+                      ="admin"
+                      %}selected{%
+                      endif
+                      %}
+                    >
+                      Admin
+                    </option>
+                    <option
+                      value="doctor"
+                      {%
+                      if
+                      role=""
+                      ="doctor"
+                      %}selected{%
+                      endif
+                      %}
+                    >
+                      Doctor
+                    </option>
+                    <option
+                      value="patient"
+                      {%
+                      if
+                      role=""
+                      ="patient"
+                      %}selected{%
+                      endif
+                      %}
+                    >
+                      Patient
+                    </option>
+                  </select>
+                </div>
+
+                <div class="user-field-group">
+                  <label for="status">Status</label>
+                  <select id="status" name="status">
+                    <option
+                      value="active"
+                      {%
+                      if
+                      status=""
+                      ="active"
+                      %}selected{%
+                      endif
+                      %}
+                    >
+                      Active
+                    </option>
+                    <option
+                      value="inactive"
+                      {%
+                      if
+                      status=""
+                      ="inactive"
+                      %}selected{%
+                      endif
+                      %}
+                    >
+                      Inactive
+                    </option>
+                  </select>
+                </div>
+
+                <div class="user-field-group">
+                  <label for="password">New Password (optional)</label>
+                  <input
+                    id="password"
+                    name="password"
+                    type="password"
+                    placeholder="Leave empty to keep current password"
+                  />
+                </div>
+
+                <div class="user-field-group">
+                  <label for="confirm_password">Confirm New Password</label>
+                  <input
+                    id="confirm_password"
+                    name="confirm_password"
+                    type="password"
+                    placeholder="Confirm new password"
+                  />
+                </div>
+              </div>
+
+              <div class="user-form-actions">
+                <a href="{% url 'manage_users' %}" class="btn-secondary-link"
+                  >Cancel</a
+                >
+                <button type="submit" class="primary-btn">Update User</button>
+              </div>
+            </form>
+          </section>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

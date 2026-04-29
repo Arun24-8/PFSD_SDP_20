@@ -1,0 +1,336 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reminders - MediConnect</title>
+    <link
+      rel="stylesheet"
+      href="{% static 'dashboard/css/doctor-pages.css' %}"
+    />
+    <style>
+      /* Inline reminder styles - temporary for page display */
+      .reminder-item {
+        background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
+        border: 2px solid #e8ecf1;
+        border-radius: 14px;
+        padding: 18px;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 16px;
+        align-items: center;
+        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 12px;
+      }
+
+      .reminder-item::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background: linear-gradient(180deg, #f97316 0%, #ea580c 100%);
+        transition: width 0.3s ease;
+      }
+
+      .reminder-item:hover {
+        border-color: #d1dce6;
+        box-shadow: 0 12px 24px rgba(15, 23, 42, 0.12);
+        transform: translateY(-2px);
+      }
+
+      .reminder-item:hover::before {
+        width: 6px;
+      }
+
+      .reminder-copy {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .reminder-copy h4 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 700;
+        color: #1a202c;
+        letter-spacing: -0.3px;
+      }
+
+      .reminder-copy p {
+        margin: 0;
+        font-size: 14px;
+        color: #6b7280;
+        font-weight: 500;
+      }
+
+      .reminder-copy span {
+        font-size: 12px;
+        color: #9ca3af;
+        font-weight: 500;
+        display: flex;
+        gap: 4px;
+        align-items: center;
+      }
+
+      .reminder-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+
+      .reminder-actions form {
+        margin: 0;
+      }
+
+      .reminder-actions .btn {
+        padding: 8px 12px;
+        font-size: 12px;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        border: none;
+        cursor: pointer;
+        font-weight: 700;
+      }
+
+      .reminder-actions .btn.accept {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        box-shadow: 0 4px 10px rgba(16, 185, 129, 0.25);
+      }
+
+      .reminder-actions .btn.accept:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35);
+      }
+
+      .reminder-actions .btn.reject {
+        background: linear-gradient(135deg, #fecaca 0%, #fca5a5 100%);
+        color: #991b1b;
+        border: 1px solid #fca5a5;
+        box-shadow: 0 2px 8px rgba(185, 28, 28, 0.1);
+      }
+
+      .reminder-actions .btn.reject:hover {
+        background: linear-gradient(135deg, #fca5a5 0%, #f87171 100%);
+        border-color: #f87171;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(185, 28, 28, 0.2);
+      }
+
+      .reminder-detail {
+        text-decoration: none;
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+        color: #2563eb;
+        padding: 8px 12px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-block;
+        transition: all 0.2s ease;
+      }
+
+      .reminder-detail:hover {
+        background: #dbeafe;
+        border-color: #93c5fd;
+        color: #1d4ed8;
+        transform: translateY(-1px);
+      }
+
+      .reminder-card-block {
+        padding: 20px;
+        display: grid;
+        gap: 14px;
+        max-width: 900px;
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #9ca3af;
+        font-size: 16px;
+        background: #f9fafb;
+        border-radius: 12px;
+        border: 2px dashed #e5e7eb;
+      }
+
+      .btn-back-appointments {
+        text-decoration: none;
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: white;
+        padding: 10px 16px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 13px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        border: none;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+      }
+
+      .btn-back-appointments:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(37, 99, 235, 0.35);
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+      }
+
+      .btn-back-appointments:active {
+        transform: translateY(0);
+      }
+
+      @media (max-width: 768px) {
+        .reminder-item {
+          grid-template-columns: 1fr;
+          padding: 14px;
+        }
+
+        .reminder-actions {
+          justify-content: flex-start;
+          gap: 6px;
+        }
+
+        .reminder-actions .btn {
+          padding: 7px 10px;
+          font-size: 11px;
+        }
+
+        .reminder-copy h4 {
+          font-size: 16px;
+        }
+
+        .reminder-card-block {
+          padding: 12px;
+          gap: 10px;
+        }
+
+        .page-head {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        .btn-back-appointments {
+          margin-top: 12px;
+          width: 100%;
+          justify-content: center;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .reminder-item::before {
+          display: none;
+        }
+
+        .reminder-actions {
+          flex-direction: column;
+          width: 100%;
+        }
+
+        .reminder-actions .btn,
+        .reminder-detail {
+          width: 100%;
+          text-align: center;
+          padding: 10px 8px;
+        }
+
+        .reminder-card-block {
+          padding: 8px;
+        }
+
+        .reminder-copy h4 {
+          font-size: 15px;
+        }
+
+        .btn-back-appointments {
+          width: 100%;
+          padding: 10px 12px;
+          font-size: 12px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="patient-shell doctor-shell">
+      {% include "dashboard/components/doctor_sidebar.html" %}
+
+      <main class="content">
+        <header class="top-header">
+          <div>
+            <h1>Reminders</h1>
+            <p>Pending patient requests</p>
+          </div>
+          <a
+            class="notify-btn"
+            aria-label="Notifications"
+            href="{% url 'doctor_reports' %}"
+          >
+            <span>🔔</span>
+          </a>
+        </header>
+
+        <section class="patient-main">
+          <div class="page-head">
+            <div>
+              <h2>Mini Reminders</h2>
+              <p>Review patients and take action quickly</p>
+            </div>
+            <a
+              href="{% url 'doctor_appointments' %}"
+              class="btn-back-appointments"
+              >← Back to Appointments</a
+            >
+          </div>
+
+          <section class="card-block reminder-card-block">
+            {% for reminder in reminders %}
+            <article class="reminder-item">
+              <div class="reminder-copy">
+                <h4>{{ reminder.patient }}</h4>
+                <p>{{ reminder.reason }}</p>
+                <span
+                  >{{ reminder.date_label }} {{ reminder.day }} {{
+                  reminder.month }} {{ reminder.year }} · {{ reminder.time }} ·
+                  {{ reminder.status }}</span
+                >
+              </div>
+              <div class="reminder-actions">
+                <a
+                  href="{% url 'doctor_pending_patient_detail' reminder.appointment_index %}"
+                  class="btn reminder-detail"
+                  >View</a
+                >
+                <form
+                  method="post"
+                  action="{% url 'doctor_accept_appointment' reminder.appointment_index %}"
+                >
+                  {% csrf_token %}
+                  <button type="submit" class="btn accept">Accept</button>
+                </form>
+                <form
+                  method="post"
+                  action="{% url 'doctor_reject_appointment' reminder.appointment_index %}"
+                >
+                  {% csrf_token %}
+                  <button type="submit" class="btn reject">Reject</button>
+                </form>
+              </div>
+            </article>
+            {% empty %}
+            <div class="empty-state">No reminders available</div>
+            {% endfor %}
+          </section>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

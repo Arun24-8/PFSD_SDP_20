@@ -1,0 +1,61 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Waiting Patients - MediConnect</title>
+    <link
+      rel="stylesheet"
+      href="{% static 'dashboard/css/doctor-pages.css' %}"
+    />
+  </head>
+  <body>
+    <div class="patient-shell doctor-shell">
+      {% include "dashboard/components/doctor_sidebar.html" %}
+
+      <main class="content">
+        <header class="top-header">
+          <div>
+            <h1>Waiting Patients</h1>
+            <p>Patients awaiting approval or triage</p>
+          </div>
+        </header>
+
+        <section class="patient-main">
+          <div class="page-head">
+            <div>
+              <h2>Waiting List</h2>
+              <p>These patients have requested appointments and are pending</p>
+            </div>
+          </div>
+
+          <section class="card-block">
+            {% if waiting %} {% for p in waiting %}
+            <article class="appointment-row">
+              <div class="date-card">
+                <span>WAIT</span>
+                <strong>{{ p.patient|slice:":2"|upper }}</strong>
+              </div>
+              <div class="appointment-meta">
+                <h4>{{ p.patient }}</h4>
+                <p>{{ p.reason }}</p>
+                <div class="chips">
+                  <span>🕘 {{ p.time }}</span>
+                  <span>📍 {{ p.mode }}</span>
+                </div>
+              </div>
+              <span class="status-chip">{{ p.status }}</span>
+              <a href="{% url 'doctor_reschedule' p.idx %}" class="delete-btn"
+                >Reschedule</a
+              >
+            </article>
+            {% endfor %} {% else %}
+            <div class="panel-head"><h3>No waiting patients</h3></div>
+            {% endif %}
+          </section>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

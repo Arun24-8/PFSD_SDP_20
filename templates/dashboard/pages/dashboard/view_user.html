@@ -1,0 +1,113 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>View User - MediConnect</title>
+    <link
+      rel="stylesheet"
+      href="{% static 'dashboard/css/admin-dashboard.css' %}"
+    />
+  </head>
+  <body>
+    <div class="admin-shell">
+      <aside class="sidebar">
+        <div class="brand-wrap">
+          <div class="brand-icon">⚙</div>
+          <div>
+            <h2>MediConnect</h2>
+            <p>ADMIN PANEL</p>
+          </div>
+        </div>
+
+        <nav class="side-nav" aria-label="Admin menu">
+          <a href="/admin/dashboard/" class="side-link">Dashboard</a>
+          <a href="/admin/manage-users/" class="side-link active"
+            >Manage Users</a
+          >
+          <a href="/admin/reports/" class="side-link">Reports</a>
+          <a href="/admin/security/" class="side-link">Security</a>
+        </nav>
+
+        <div class="sidebar-user">
+          <div class="avatar admin-avatar">A</div>
+          <div class="sidebar-user-meta">
+            <strong>Administrator</strong>
+            <p>Admin</p>
+          </div>
+        </div>
+
+        <a href="{% url 'signout' %}" class="signout-btn">Sign Out</a>
+      </aside>
+
+      <main class="content">
+        <header class="top-header">
+          <div>
+            <h1>User Details</h1>
+            <p>Profile and account information</p>
+          </div>
+          <a href="{% url 'manage_users' %}" class="btn-secondary-link">Back</a>
+        </header>
+
+        <section class="dashboard-main">
+          <section class="panel user-form-panel">
+            <div class="panel-head">
+              <h3>{{ user_obj.first_name }} {{ user_obj.last_name }}</h3>
+              <p>User ID #{{ user_obj.id }}</p>
+            </div>
+
+            <div class="status-item">
+              <div class="status-info">
+                <h4>Email</h4>
+                <p>{{ user_obj.email }}</p>
+              </div>
+            </div>
+
+            <div class="status-item">
+              <div class="status-info">
+                <h4>Role</h4>
+                <p>{{ role|title }}</p>
+              </div>
+            </div>
+
+            <div class="status-item">
+              <div class="status-info">
+                <h4>Status</h4>
+                <p>
+                  {% if user_obj.is_active %}Active{% else %}Inactive{% endif %}
+                </p>
+              </div>
+            </div>
+
+            <div class="status-item">
+              <div class="status-info">
+                <h4>Joined</h4>
+                <p>{{ user_obj.date_joined|date:"M d, Y H:i" }}</p>
+              </div>
+            </div>
+
+            <div class="status-item">
+              <div class="status-info">
+                <h4>Last Login</h4>
+                <p>
+                  {% if user_obj.last_login %}{{ user_obj.last_login|date:"M d,
+                  Y H:i" }}{% else %}Never{% endif %}
+                </p>
+              </div>
+            </div>
+
+            <div class="user-form-actions">
+              <a href="{% url 'manage_users' %}" class="btn-secondary-link"
+                >Close</a
+              >
+              <a href="{% url 'edit_user' user_obj.id %}" class="primary-btn"
+                >Edit User</a
+              >
+            </div>
+          </section>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>
