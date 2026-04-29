@@ -82,16 +82,41 @@
               <h3>📅 Your Schedule</h3>
             </div>
 
-            <div id="appointmentsList"></div>
+            {% if appointments %}
+              {% for appointment in appointments %}
+              <article class="appointment-row" data-date-iso="{{ appointment.date_iso }}">
+                <div class="date-card">
+                  <span>{{ appointment.date_label }}{% if appointment.date_label %},{% endif %}</span>
+                  <strong>{{ appointment.day }}</strong>
+                </div>
 
-            <p
-              id="noAppointmentText"
-              class="no-appointment-text"
-              style="display: none"
-            >
-              No appointment booked yet. Click "Book New Appointment" and select
-              a time slot.
-            </p>
+                <div class="appointment-meta">
+                  <h4>{{ appointment.doctor|default:appointment.patient }}</h4>
+                  <p>{{ appointment.specialist }}</p>
+                  <div class="meta-chips">
+                    <span>{{ appointment.time }}</span>
+                    <span>{{ appointment.mode }}</span>
+                  </div>
+                </div>
+
+                <div style="display: grid; gap: 10px; align-items: center;">
+                  <span class="status-pill">{{ appointment.status_label }}</span>
+                  <button
+                    type="button"
+                    class="join-btn{% if not appointment.join_available %} disabled-btn{% endif %}"
+                    {% if not appointment.join_available %}disabled aria-disabled="true"{% endif %}
+                    data-doctor="{{ appointment.doctor|default:appointment.patient }}"
+                    data-specialist="{{ appointment.specialist }}"
+                    data-time="{{ appointment.time }}"
+                  >
+                    {% if appointment.join_available %}Join Call{% else %}Awaiting Confirmation{% endif %}
+                  </button>
+                </div>
+              </article>
+              {% endfor %}
+            {% else %}
+              <p class="empty-state">No upcoming appointments available.</p>
+            {% endif %}
           </section>
         </section>
       </main>
@@ -135,132 +160,30 @@
         const avatarNode = document.getElementById("callAvatar");
         const statusNode = document.getElementById("callStatus");
         const endButton = document.getElementById("endCallBtn");
-        const appointmentsList = document.getElementById("appointmentsList");
-        const noAppointmentText = document.getElementById("noAppointmentText");
-        const filterDateInput = document.getElementById(
-          "appointmentFilterDate",
+        const filterDateInput = document.getElementById("appointmentFilterDate");
+        const appointmentRows = document.querySelectorAll(
+          ".appointment-row[data-date-iso]",
         );
-        const appointmentListStorageKey = "patientBookedAppointments";
+        const emptyState = document.querySelector(".empty-state");
         let timerId = null;
         let elapsed = 0;
 
-        function escapeHtml(value) {
-          return String(value || "")
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/\"/g, "&quot;")
-            .replace(/'/g, "&#39;");
-        }
-
-        function loadAppointments() {
-          const rawList = localStorage.getItem(appointmentListStorageKey);
-          if (rawList) {
-            try {
-              const parsed = JSON.parse(rawList);
-              if (Array.isArray(parsed)) {
-                return parsed;
-              }
-            } catch (error) {
-              localStorage.removeItem(appointmentListStorageKey);
-            }
-          }
-
-          const legacyRaw = localStorage.getItem("patientBookedAppointment");
-          if (!legacyRaw) {
-            return [];
-          }
-
-          try {
-            const legacy = JSON.parse(legacyRaw);
-            const migrated = legacy ? [legacy] : [];
-            localStorage.setItem(
-              appointmentListStorageKey,
-              JSON.stringify(migrated),
-            );
-            return migrated;
-          } catch (error) {
-            localStorage.removeItem("patientBookedAppointment");
-            return [];
-          }
-        }
-
-        function saveAppointments(items) {
-          localStorage.setItem(
-            appointmentListStorageKey,
-            JSON.stringify(items),
-          );
-          if (items.length > 0) {
-            localStorage.setItem(
-              "patientBookedAppointment",
-              JSON.stringify(items[items.length - 1]),
-            );
-          } else {
-            localStorage.removeItem("patientBookedAppointment");
-          }
-        }
-
-        function renderAppointments() {
-          const appointments = loadAppointments();
+        function updateFilteredRows() {
           const selectedDate = filterDateInput.value;
-          const indexedAppointments = appointments.map(
-            function (appointment, index) {
-              return { appointment: appointment, index: index };
-            },
-          );
-          const visibleAppointments = selectedDate
-            ? indexedAppointments.filter(function (item) {
-                return item.appointment.dateISO === selectedDate;
-              })
-            : indexedAppointments;
+          let anyVisible = false;
 
-          if (visibleAppointments.length === 0) {
-            appointmentsList.innerHTML = "";
-            if (appointments.length > 0 && selectedDate) {
-              noAppointmentText.textContent =
-                "No appointments found for selected date.";
-            } else {
-              noAppointmentText.textContent =
-                'No appointment booked yet. Click "Book New Appointment" and select a time slot.';
+          appointmentRows.forEach(function (row) {
+            const rowDate = row.dataset.dateIso;
+            const visible = !selectedDate || selectedDate === rowDate;
+            row.style.display = visible ? "grid" : "none";
+            if (visible) {
+              anyVisible = true;
             }
-            noAppointmentText.style.display = "block";
-            return;
-          }
+          });
 
-          noAppointmentText.style.display = "none";
-          appointmentsList.innerHTML = visibleAppointments
-            .map(function (item) {
-              const appointment = item.appointment;
-              const index = item.index;
-              return `
-                <article class="appointment-row" data-index="${index}">
-                  <div class="date-card">
-                    <span>${escapeHtml(appointment.dateLabel || "TODAY")}</span>
-                    <strong>${escapeHtml(appointment.day || "--")}</strong>
-                  </div>
-                  <div class="appointment-meta">
-                    <h4>${escapeHtml(appointment.doctor || "Doctor")}</h4>
-                    <p>${escapeHtml(appointment.specialist || "Specialist")}</p>
-                    <div class="chips">
-                      <span>🕘 ${escapeHtml(appointment.time || "--:--")}</span>
-                      <span>🎥 ${escapeHtml(appointment.mode || "Video Call")}</span>
-                    </div>
-                  </div>
-                  <span class="status-chip">✔ ${escapeHtml(appointment.status || "CONFIRMED")}</span>
-                  <button type="button" class="delete-btn" data-delete-index="${index}">Delete</button>
-                  <button
-                    type="button"
-                    class="join-btn"
-                    data-doctor="${escapeHtml(appointment.doctor || "Doctor")}"
-                    data-specialist="${escapeHtml(appointment.specialist || "Specialist")}"
-                    data-time="${escapeHtml(appointment.time || "")}" 
-                  >
-                    Join Call
-                  </button>
-                </article>
-              `;
-            })
-            .join("");
+          if (emptyState) {
+            emptyState.style.display = anyVisible ? "none" : "block";
+          }
         }
 
         function formatTime(totalSeconds) {
@@ -314,27 +237,18 @@
           modal.setAttribute("aria-hidden", "true");
         }
 
-        appointmentsList.addEventListener("click", function (event) {
-          const deleteButton = event.target.closest(".delete-btn");
-          if (deleteButton) {
-            const index = Number(
-              deleteButton.getAttribute("data-delete-index"),
-            );
-            const appointments = loadAppointments();
-            if (!Number.isNaN(index)) {
-              appointments.splice(index, 1);
-              saveAppointments(appointments);
-              closeCall();
-              renderAppointments();
+        document.querySelectorAll(".join-btn").forEach(function (button) {
+          button.addEventListener("click", function () {
+            if (button.disabled) {
+              return;
             }
-            return;
-          }
-
-          const joinButton = event.target.closest(".join-btn");
-          if (joinButton) {
-            openCall(joinButton);
-          }
+            openCall(button);
+          });
         });
+
+        if (filterDateInput) {
+          filterDateInput.addEventListener("change", updateFilteredRows);
+        }
 
         endButton.addEventListener("click", closeCall);
         modal.addEventListener("click", function (event) {
@@ -342,10 +256,6 @@
             closeCall();
           }
         });
-
-        filterDateInput.addEventListener("change", renderAppointments);
-
-        renderAppointments();
       })();
     </script>
   </body>

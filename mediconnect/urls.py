@@ -32,6 +32,10 @@ urlpatterns = [
          name='patient_appointment_doctors'),
     path('patient/prescriptions/', doctor_views.patient_prescriptions,
          name='patient_prescriptions'),
+    path('patient/prescriptions/download/<int:prescription_index>/', doctor_views.patient_download_prescription,
+         name='patient_download_prescription'),
+    path('patient/prescriptions/<int:prescription_index>/', doctor_views.patient_prescription_detail,
+         name='patient_prescription_detail'),
 
     # doctor app urls
     path('doctor/', include('doctor.urls')),

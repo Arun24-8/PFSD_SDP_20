@@ -150,14 +150,46 @@ def admin_dashboard(request):
 
     admin_name = request.session.get("admin_name")
 
-    # sample aggregate data pulled from patient dashboard idea
-    from doctor.models import Doctor
     from django.db import utils as db_utils
+    from doctor.models import Doctor
+    from doctor.views import DOCTOR_APPOINTMENTS, DOCTOR_E_PRESCRIPTIONS, DOCTOR_PATIENTS, PATIENT_BOOKING_DOCTORS
 
-    SAMPLE_PATIENT_STATS = {
-        'upcoming_appointments': 20,
-        'active_prescriptions': 45,
-        'total_visits': 1023,
+    patient_count = 0
+    doctor_count = 0
+    try:
+        patient_count = User.objects.filter(groups__name='Patient').count()
+        doctor_count = Doctor.objects.count()
+        if patient_count == 0:
+            patient_count = len(DOCTOR_PATIENTS)
+        if doctor_count == 0:
+            doctor_count = len({item.get('name') for item in PATIENT_BOOKING_DOCTORS if item.get('name')})
+    except db_utils.OperationalError:
+        patient_count = len(DOCTOR_PATIENTS)
+        doctor_count = len({item.get('name') for item in PATIENT_BOOKING_DOCTORS if item.get('name')})
+
+    total_consultations = len(DOCTOR_APPOINTMENTS)
+    alerts = sum(1 for appointment in DOCTOR_APPOINTMENTS if appointment.get('status') == 'PENDING')
+    upcoming_appointments = sum(
+        1 for appointment in DOCTOR_APPOINTMENTS
+        if appointment.get('status') in {'PENDING', 'CONFIRMED'}
+    )
+    active_prescriptions = len(DOCTOR_E_PRESCRIPTIONS)
+    total_visits = sum(
+        1 for appointment in DOCTOR_APPOINTMENTS
+        if appointment.get('status') == 'COMPLETED'
+    )
+
+    patient_stats = {
+        'upcoming_appointments': upcoming_appointments,
+        'active_prescriptions': active_prescriptions,
+        'total_visits': total_visits,
+    }
+
+    stats = {
+        'patients': patient_count,
+        'doctors': doctor_count,
+        'total_consultations': total_consultations,
+        'alerts': alerts,
     }
 
     SAMPLE_APPOINTMENT_PREVIEW = [
@@ -180,7 +212,8 @@ def admin_dashboard(request):
                 'last_name': ' '.join(admin_name.split()[1:]) if len(admin_name.split()) > 1 else ''
             }
         },
-        'patient_stats': SAMPLE_PATIENT_STATS,
+        'stats': stats,
+        'patient_stats': patient_stats,
         'appointment_preview': SAMPLE_APPOINTMENT_PREVIEW,
         'doctor_list': doctor_list,
     }

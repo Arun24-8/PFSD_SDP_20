@@ -401,6 +401,13 @@ body {
   font-weight: 700;
 }
 
+.join-btn.disabled-btn,
+.join-btn[disabled] {
+  background: #cbd5e1;
+  color: #475569;
+  cursor: not-allowed;
+}
+
 .prescription-card {
   padding: 18px;
 }

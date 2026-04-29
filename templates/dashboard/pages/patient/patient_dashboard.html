@@ -71,7 +71,7 @@
               <div class="stat-icon">📅</div>
               <div class="stat-copy">
                 <h3>UPCOMING</h3>
-                <strong>2</strong>
+                <strong>{{ appointments_count }}</strong>
                 <span>Appointments</span>
               </div>
             </article>
@@ -80,7 +80,7 @@
               <div class="stat-icon green">📄</div>
               <div class="stat-copy">
                 <h3>PRESCRIPTIONS</h3>
-                <strong>2</strong>
+                <strong>{{ prescriptions_count }}</strong>
                 <span>Active Now</span>
               </div>
             </article>
@@ -102,57 +102,40 @@
                 <a href="#">View all</a>
               </div>
 
-              <article class="schedule-card">
-                <div class="date-chip">
-                  <span>TODAY,</span>
-                  <strong>Oct</strong>
-                </div>
+              {% if appointments %}
+            {% for appointment in appointments %}
+            <article class="schedule-card">
+              <div class="date-chip">
+                <span>{{ appointment.date_label }}{% if appointment.date_label %},{% endif %}</span>
+                <strong>{{ appointment.day }}</strong>
+              </div>
 
-                <div class="schedule-main">
-                  <h4>Dr. Sarah Johnson</h4>
-                  <p>Cardiologist</p>
-                  <div class="meta-chips">
-                    <span>02:00 PM</span>
-                    <span>Video Call</span>
-                  </div>
+              <div class="schedule-main">
+                  <h4>{{ appointment.doctor|default:appointment.patient }}</h4>
+                <div class="meta-chips">
+                  <span>{{ appointment.time }}</span>
+                  <span>{{ appointment.mode }}</span>
                 </div>
+              </div>
 
+              <div style="display: grid; gap: 10px; align-items: center;">
+                <span class="status-pill">{{ appointment.status_label }}</span>
                 <button
                   type="button"
-                  class="join-btn"
-                  data-doctor="Dr. Sarah Johnson"
-                  data-specialist="Cardiologist"
-                  data-time="02:00 PM"
+                  class="join-btn{% if not appointment.join_available %} disabled-btn{% endif %}"
+                  {% if not appointment.join_available %}disabled aria-disabled="true"{% endif %}
+                  data-doctor="{{ appointment.doctor|default:appointment.patient }}"
+                  data-specialist="{{ appointment.specialist }}"
+                  data-time="{{ appointment.time }}"
                 >
-                  Join Call
+                  {% if appointment.join_available %}Join Call{% else %}Awaiting Confirmation{% endif %}
                 </button>
-              </article>
-
-              <article class="schedule-card">
-                <div class="date-chip">
-                  <span>TOMORROW,</span>
-                  <strong>Oct</strong>
-                </div>
-
-                <div class="schedule-main">
-                  <h4>Dr. James Carter</h4>
-                  <p>Orthopedic Surgeon</p>
-                  <div class="meta-chips">
-                    <span>10:00 AM</span>
-                    <span>In-Person</span>
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  class="join-btn"
-                  data-doctor="Dr. James Carter"
-                  data-specialist="Orthopedic Surgeon"
-                  data-time="10:00 AM"
-                >
-                  Join Call
-                </button>
-              </article>
+              </div>
+            </article>
+            {% endfor %}
+          {% else %}
+            <p class="empty-state">No upcoming appointments available.</p>
+          {% endif %}
             </section>
 
             <section class="panel">
@@ -161,45 +144,33 @@
                 <a href="#">View all</a>
               </div>
 
+              {% for prescription in prescriptions %}
               <article class="prescription-card">
                 <div class="prescription-head">
                   <div>
-                    <h4>Dr. Michael Chen</h4>
-                    <p>Oct 10, 2023</p>
+                    <h4>{{ prescription.patient }}</h4>
+                    <p>{{ prescription.date }}</p>
                   </div>
-                  <span class="status-pill">ACTIVE</span>
+                  <span class="status-pill">{{ prescription.status_label }}</span>
                 </div>
 
                 <ul>
-                  <li>Amoxicillin 500mg</li>
-                  <li>Ibuprofen 400mg</li>
+                  {% for medicine in prescription.medicines %}
+                  <li>{{ medicine.name }}</li>
+                  {% endfor %}
                 </ul>
 
                 <div class="action-row">
-                  <button type="button" class="btn-light">Download</button>
-                  <button type="button" class="btn-green">Refill</button>
+                  <a href="{% url 'patient_download_prescription' prescription.index %}"
+                     class="btn-light"
+                     download
+                  >Download</a>
+                  <a href="{% url 'patient_prescription_detail' prescription.index %}"
+                     class="btn-green"
+                  >Open Record</a>
                 </div>
               </article>
-
-              <article class="prescription-card">
-                <div class="prescription-head">
-                  <div>
-                    <h4>Dr. Sarah Johnson</h4>
-                    <p>Sep 15, 2023</p>
-                  </div>
-                  <span class="status-pill">ACTIVE</span>
-                </div>
-
-                <ul>
-                  <li>Atorvastatin 10mg</li>
-                  <li>Aspirin 81mg</li>
-                </ul>
-
-                <div class="action-row">
-                  <button type="button" class="btn-light">Download</button>
-                  <button type="button" class="btn-green">Refill</button>
-                </div>
-              </article>
+              {% endfor %}
             </section>
           </div>
         </section>
@@ -300,6 +271,9 @@
 
         document.querySelectorAll(".join-btn").forEach(function (button) {
           button.addEventListener("click", function () {
+            if (button.disabled) {
+              return;
+            }
             openCall(button);
           });
         });

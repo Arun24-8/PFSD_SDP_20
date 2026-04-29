@@ -1,0 +1,97 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Prescription Record - MediConnect</title>
+    <link rel="stylesheet" href="{% static 'dashboard/css/patient-pages.css' %}" />
+  </head>
+  <body>
+    <div class="patient-shell">
+      <aside class="sidebar">
+        <div class="brand-wrap">
+          <div class="brand-icon">~</div>
+          <div>
+            <h2>MediConnect</h2>
+            <p>PRO HEALTHCARE</p>
+          </div>
+        </div>
+
+        <nav class="side-nav" aria-label="Patient menu">
+          <a href="{% url 'patient_dashboard' %}" class="side-link">Dashboard</a>
+          <a href="{% url 'patient_appointments' %}" class="side-link">Book Appointment</a>
+          <a href="{% url 'patient_prescriptions' %}" class="side-link active">My Prescriptions</a>
+        </nav>
+
+        <div class="sidebar-user">
+          <div class="avatar">{{ patient_name|slice:":2"|upper }}</div>
+          <div class="sidebar-user-meta">
+            <strong>{{ patient_name }}</strong>
+            <p>Patient</p>
+          </div>
+        </div>
+
+        <a href="{% url 'signout' %}" class="signout-btn">Sign Out</a>
+      </aside>
+
+      <main class="content">
+        <header class="top-header">
+          <div>
+            <h1>Prescription Record</h1>
+            <p>Review your prescription details in full.</p>
+          </div>
+          <button class="notify-btn" type="button" aria-label="Notifications">🔔</button>
+        </header>
+
+        <section class="patient-main prescription-detail-page">
+          <div class="page-head">
+            <div>
+              <h2>{{ prescription.patient }}</h2>
+              <p>{{ prescription.date }} • {{ prescription.status|title }}</p>
+            </div>
+            <a href="{% url 'patient_prescriptions' %}" class="ghost-btn">Back to Prescriptions</a>
+          </div>
+
+          <section class="card-block prescription-detail-block">
+            <div class="card-block-head">
+              <h3>{{ prescription.diagnosis }}</h3>
+              <p class="prescription-summary">A concise summary of your medication plan and current prescription details.</p>
+            </div>
+
+            <div class="prescription-detail-grid">
+              <aside class="prescription-sidebar">
+                <div class="prescription-tag">Diagnosis</div>
+                <div class="prescription-keytext">{{ prescription.diagnosis }}</div>
+                <div class="prescription-pill-group">
+                  <span>Date: {{ prescription.date }}</span>
+                  <span>Status: {{ prescription.status|title }}</span>
+                </div>
+              </aside>
+
+              <article class="prescription-card">
+                <div class="prescription-card-head">
+                  <h4>Medication Details</h4>
+                  <p>Take your medications as prescribed and follow the schedule provided by your doctor.</p>
+                </div>
+
+                <ul class="med-list">
+                  {% for medicine in prescription.medicines %}
+                  <li>
+                    <strong>{{ medicine.name }}</strong>
+                    <span>{{ medicine.note }}</span>
+                  </li>
+                  {% endfor %}
+                </ul>
+
+                <div class="prescription-actions">
+                  <a href="{% url 'patient_download_prescription' prescription.index %}" class="record-btn" download>Download Prescription</a>
+                </div>
+              </article>
+            </div>
+          </section>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

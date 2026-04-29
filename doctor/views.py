@@ -3,6 +3,7 @@ import re
 import random
 
 from django.shortcuts import render, redirect
+from django.http import HttpResponse
 from datetime import datetime
 
 MONTH_MAP = {
@@ -62,6 +63,34 @@ def _name_from_email(email):
     return normalized.title() if normalized else "Patient"
 
 
+def _get_patient_appointments(patient_name):
+    appointments = []
+    for idx, appointment in enumerate(DOCTOR_APPOINTMENTS):
+        item = appointment.copy()
+        item["appointment_index"] = idx
+        try:
+            item["date_iso"] = datetime.strptime(
+                f"{appointment.get('day', '01')} {appointment.get('month', 'JAN')} {appointment.get('year', '2026')}",
+                "%d %b %Y",
+            ).date().isoformat()
+        except ValueError:
+            item["date_iso"] = ""
+        item["join_available"] = appointment.get("status") == "CONFIRMED"
+        item["status_label"] = appointment.get("status", "PENDING").title()
+        appointments.append(item)
+    return appointments
+
+
+def _get_patient_prescriptions(patient_name):
+    prescriptions = []
+    for idx, prescription in enumerate(DOCTOR_E_PRESCRIPTIONS):
+        item = prescription.copy()
+        item["index"] = idx
+        item["status_label"] = prescription.get("status", "ACTIVE").title()
+        prescriptions.append(item)
+    return prescriptions
+
+
 def home(request):
     return render(
         request,
@@ -84,11 +113,18 @@ def patient_dashboard(request):
     if not patient_name:
         return redirect("login")
 
+    appointments = _get_patient_appointments(patient_name)
+    prescriptions = _get_patient_prescriptions(patient_name)
+
     return render(
         request,
         "dashboard/pages/patient/patient_dashboard.html",
         {
             "patient_name": patient_name,
+            "appointments": appointments,
+            "appointments_count": len(appointments),
+            "prescriptions_count": len(prescriptions),
+            "prescriptions": prescriptions,
         },
     )
 
@@ -98,11 +134,14 @@ def patient_appointments(request):
     if not patient_name:
         return redirect("login")
 
+    appointments = _get_patient_appointments(patient_name)
+
     return render(
         request,
         "dashboard/pages/patient/appointments.html",
         {
             "patient_name": patient_name,
+            "appointments": appointments,
         },
     )
 
@@ -127,11 +166,63 @@ def patient_prescriptions(request):
     if not patient_name:
         return redirect("login")
 
+    prescriptions = _get_patient_prescriptions(patient_name)
+
     return render(
         request,
         "dashboard/pages/patient/prescriptions.html",
         {
             "patient_name": patient_name,
+            "prescriptions": prescriptions,
+        },
+    )
+
+
+def patient_download_prescription(request, prescription_index):
+    patient_name = request.session.get("patient_name")
+    if not patient_name:
+        return redirect("login")
+
+    if not (0 <= prescription_index < len(DOCTOR_E_PRESCRIPTIONS)):
+        return redirect("patient_prescriptions")
+
+    prescription = DOCTOR_E_PRESCRIPTIONS[prescription_index]
+    filename = f"prescription-{prescription_index + 1}.txt"
+    lines = [
+        f"Patient: {prescription.get('patient', '')}",
+        f"Date: {prescription.get('date', '')}",
+        f"Diagnosis: {prescription.get('diagnosis', '')}",
+        f"Status: {prescription.get('status', '')}",
+        "",
+        "Medicines:",
+    ]
+    for med in prescription.get("medicines", []):
+        name = med.get("name", "Medicine")
+        note = med.get("note", "")
+        lines.append(f"- {name}: {note}")
+
+    content = "\n".join(lines)
+    response = HttpResponse(content, content_type="text/plain")
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
+    return response
+
+
+def patient_prescription_detail(request, prescription_index):
+    patient_name = request.session.get("patient_name")
+    if not patient_name:
+        return redirect("login")
+
+    if not (0 <= prescription_index < len(DOCTOR_E_PRESCRIPTIONS)):
+        return redirect("patient_prescriptions")
+
+    prescription = DOCTOR_E_PRESCRIPTIONS[prescription_index].copy()
+    prescription["index"] = prescription_index
+    return render(
+        request,
+        "dashboard/pages/patient/patient_prescription_detail.html",
+        {
+            "patient_name": patient_name,
+            "prescription": prescription,
         },
     )
 
@@ -203,6 +294,7 @@ DOCTOR_APPOINTMENTS = [
         "month": "APR",
         "year": "2026",
         "patient": "Arun Kumar",
+        "doctor": "Dr. Sarah Johnson",
         "reason": "Follow-up for hypertension",
         "time": "09:30 AM",
         "mode": "In-Person",
@@ -214,6 +306,7 @@ DOCTOR_APPOINTMENTS = [
         "month": "APR",
         "year": "2026",
         "patient": "Meera Nair",
+        "doctor": "Dr. James Carter",
         "reason": "Diabetes medication review",
         "time": "11:00 AM",
         "mode": "Video Call",
@@ -225,6 +318,7 @@ DOCTOR_APPOINTMENTS = [
         "month": "APR",
         "year": "2026",
         "patient": "Rahul Verma",
+        "doctor": "Dr. Anjali Singh",
         "reason": "Post-surgery check",
         "time": "02:30 PM",
         "mode": "In-Person",
@@ -236,6 +330,7 @@ DOCTOR_APPOINTMENTS = [
         "month": "APR",
         "year": "2026",
         "patient": "Anitha Reddy",
+        "doctor": "Dr. Neha Puri",
         "reason": "General consultation",
         "time": "04:15 PM",
         "mode": "Video Call",
@@ -247,6 +342,7 @@ DOCTOR_APPOINTMENTS = [
         "month": "APR",
         "year": "2026",
         "patient": "Sana Shaik",
+        "doctor": "Dr. Priya Menon",
         "reason": "Migraine follow-up",
         "time": "10:45 AM",
         "mode": "Video Call",
@@ -258,6 +354,7 @@ DOCTOR_APPOINTMENTS = [
         "month": "APR",
         "year": "2026",
         "patient": "Meera Nair",
+        "doctor": "Dr. Ravi Reddy",
         "reason": "Diabetes quarterly review",
         "time": "03:00 PM",
         "mode": "In-Person",

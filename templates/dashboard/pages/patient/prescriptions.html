@@ -61,7 +61,6 @@
               <h2>Prescriptions</h2>
               <p>View and manage your medications</p>
             </div>
-            <button type="button" class="ghost-btn">⟳ Request Refill</button>
           </div>
 
           <div class="search-wrap">
@@ -72,55 +71,30 @@
           </div>
 
           <div class="rx-grid">
+            {% for prescription in prescriptions %}
             <article class="rx-card">
               <div class="rx-head">
                 <div>
-                  <h4>Dr. Kavitha Rao</h4>
-                  <p>Dermatology • Oct 10, 2023</p>
+                  <h4>{{ prescription.patient }}</h4>
+                  <p>{{ prescription.diagnosis }} • {{ prescription.date }}</p>
                 </div>
-                <span class="status-chip">ACTIVE</span>
+                <span class="status-chip">{{ prescription.status_label }}</span>
               </div>
-              <div class="diagnosis">Acute Eczema Flare-up</div>
+              <div class="diagnosis">{{ prescription.diagnosis }}</div>
               <ul class="med-list">
+                {% for medicine in prescription.medicines %}
                 <li>
-                  <strong>Amoxicillin 500mg</strong
-                  ><span>Take with food, every 8 hours.</span>
+                  <strong>{{ medicine.name }}</strong>
+                  <span>{{ medicine.note }}</span>
                 </li>
-                <li>
-                  <strong>Ibuprofen 400mg</strong
-                  ><span>Take with food, every 8 hours.</span>
-                </li>
+                {% endfor %}
               </ul>
               <div class="rx-actions">
-                <button class="record-btn" type="button">Open Record</button>
-                <button class="icon-btn" type="button">⇩</button>
+                <a href="{% url 'patient_prescription_detail' prescription.index %}" class="record-btn">Open Record</a>
+                <a href="{% url 'patient_download_prescription' prescription.index %}" class="icon-btn" download>⇩</a>
               </div>
             </article>
-
-            <article class="rx-card">
-              <div class="rx-head">
-                <div>
-                  <h4>Dr. Rajesh Reddy</h4>
-                  <p>Cardiology • Sep 15, 2023</p>
-                </div>
-                <span class="status-chip">ACTIVE</span>
-              </div>
-              <div class="diagnosis">Hypertension</div>
-              <ul class="med-list">
-                <li>
-                  <strong>Atorvastatin 10mg</strong
-                  ><span>Take once daily before bed.</span>
-                </li>
-                <li>
-                  <strong>Aspirin 81mg</strong
-                  ><span>Take once daily before bed.</span>
-                </li>
-              </ul>
-              <div class="rx-actions">
-                <button class="record-btn" type="button">Open Record</button>
-                <button class="icon-btn" type="button">⇩</button>
-              </div>
-            </article>
+            {% endfor %}
           </div>
         </section>
       </main>

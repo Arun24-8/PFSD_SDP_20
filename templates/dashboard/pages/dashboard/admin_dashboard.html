@@ -62,9 +62,9 @@
             <article class="stat-card">
               <div class="stat-icon">👥</div>
               <div class="stat-copy">
-                <h3>TOTAL USERS</h3>
-                <strong>156</strong>
-                <span>Active Users</span>
+                <h3>PATIENTS</h3>
+                <strong>{{ stats.patients }}</strong>
+                <span>Registered</span>
               </div>
             </article>
 
@@ -72,7 +72,7 @@
               <div class="stat-icon green">👨‍⚕️</div>
               <div class="stat-copy">
                 <h3>DOCTORS</h3>
-                <strong>32</strong>
+                <strong>{{ stats.doctors }}</strong>
                 <span>Verified</span>
               </div>
             </article>
@@ -81,8 +81,8 @@
               <div class="stat-icon blue">🏥</div>
               <div class="stat-copy">
                 <h3>CONSULTATIONS</h3>
-                <strong>487</strong>
-                <span>This Month</span>
+                <strong>{{ stats.total_consultations }}</strong>
+                <span>Total Appointments</span>
               </div>
             </article>
 
@@ -90,7 +90,7 @@
               <div class="stat-icon purple">⚠️</div>
               <div class="stat-copy">
                 <h3>ALERTS</h3>
-                <strong>5</strong>
+                <strong>{{ stats.alerts }}</strong>
                 <span>Pending Review</span>
               </div>
             </article>
