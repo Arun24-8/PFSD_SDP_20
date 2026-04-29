@@ -22,5 +22,9 @@ urlpatterns = [
          name='doctor_patient_prescription'),
     path('e-prescriptions/', views.doctor_e_prescriptions,
          name='doctor_e_prescriptions'),
+    path('reports/generate/', views.doctor_generate_report,
+         name='doctor_generate_report'),
+    path('reports/<int:report_index>/', views.doctor_report_detail,
+         name='doctor_report_detail'),
     path('reports/', views.doctor_reports, name='doctor_reports'),
 ]

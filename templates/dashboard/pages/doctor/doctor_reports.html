@@ -30,12 +30,7 @@
               <h2>Performance Reports</h2>
               <p>Track your patient outcomes and service activity</p>
             </div>
-            <button type="button" class="ghost-btn">Generate Report</button>
-          </div>
-
-          <section class="card-block">
-            <div class="card-block-head">
-              <h3>Quick Summary</h3>
+              <a href="{% url 'doctor_generate_report' %}" class="ghost-btn">Generate Report</a>
             </div>
 
             <article class="appointment-row">
@@ -48,7 +43,7 @@
                 <p>Planned appointments in your schedule</p>
               </div>
               <span class="status-chip">Updated</span>
-              <button type="button" class="join-btn">View</button>
+              <a href="{% url 'doctor_appointments' %}" class="join-btn">View</a>
             </article>
 
             <article class="appointment-row">
@@ -61,7 +56,7 @@
                 <p>Active patients under your care</p>
               </div>
               <span class="status-chip">Updated</span>
-              <button type="button" class="join-btn">View</button>
+              <a href="{% url 'doctor_patients' %}" class="join-btn">View</a>
             </article>
 
             <article class="appointment-row">
@@ -74,7 +69,7 @@
                 <p>Prescriptions generated for your patients</p>
               </div>
               <span class="status-chip">Updated</span>
-              <button type="button" class="join-btn">View</button>
+              <a href="{% url 'doctor_e_prescriptions' %}" class="join-btn">View</a>
             </article>
           </section>
 
@@ -98,7 +93,7 @@
                 </div>
               </div>
               <span class="status-chip">Ready</span>
-              <button type="button" class="join-btn">Open</button>
+              <a href="{% url 'doctor_report_detail' forloop.counter0 %}" class="join-btn">Open</a>
             </article>
             {% endfor %}
           </section>

@@ -146,50 +146,25 @@
                   <div class="medicine-card">
                     <h5>{{ medicine.name }}</h5>
                     <div class="medicine-ticks">
-                      <div
-                        class="medicine-tick {% if medicine.timing_flags.before_breakfast %}checked{% endif %}"
-                      >
+                      <div class="medicine-tick {% if medicine.timing_flags.before_breakfast %}checked{% endif %}">
                         <span>Before Breakfast</span>
-                        <span
-                          >{% if medicine.timing_flags.before_breakfast %}✓{%
-                          else %}○{% endif %}</span
-                        >
+                        <span>{% if medicine.timing_flags.before_breakfast %}✓{% else %}○{% endif %}</span>
                       </div>
-                      <div
-                        class="medicine-tick {% if medicine.timing_flags.after_breakfast %}checked{% endif %}"
-                      >
+                      <div class="medicine-tick {% if medicine.timing_flags.after_breakfast %}checked{% endif %}">
                         <span>After Breakfast</span>
-                        <span
-                          >{% if medicine.timing_flags.after_breakfast %}✓{%
-                          else %}○{% endif %}</span
-                        >
+                        <span>{% if medicine.timing_flags.after_breakfast %}✓{% else %}○{% endif %}</span>
                       </div>
-                      <div
-                        class="medicine-tick {% if medicine.timing_flags.lunch %}checked{% endif %}"
-                      >
+                      <div class="medicine-tick {% if medicine.timing_flags.lunch %}checked{% endif %}">
                         <span>Lunch</span>
-                        <span
-                          >{% if medicine.timing_flags.lunch %}✓{% else %}○{%
-                          endif %}</span
-                        >
+                        <span>{% if medicine.timing_flags.lunch %}✓{% else %}○{% endif %}</span>
                       </div>
-                      <div
-                        class="medicine-tick {% if medicine.timing_flags.before_dinner %}checked{% endif %}"
-                      >
+                      <div class="medicine-tick {% if medicine.timing_flags.before_dinner %}checked{% endif %}">
                         <span>Before Dinner</span>
-                        <span
-                          >{% if medicine.timing_flags.before_dinner %}✓{% else
-                          %}○{% endif %}</span
-                        >
+                        <span>{% if medicine.timing_flags.before_dinner %}✓{% else %}○{% endif %}</span>
                       </div>
-                      <div
-                        class="medicine-tick {% if medicine.timing_flags.after_dinner %}checked{% endif %}"
-                      >
+                      <div class="medicine-tick {% if medicine.timing_flags.after_dinner %}checked{% endif %}">
                         <span>After Dinner</span>
-                        <span
-                          >{% if medicine.timing_flags.after_dinner %}✓{% else
-                          %}○{% endif %}</span
-                        >
+                        <span>{% if medicine.timing_flags.after_dinner %}✓{% else %}○{% endif %}</span>
                       </div>
                     </div>
                   </div>

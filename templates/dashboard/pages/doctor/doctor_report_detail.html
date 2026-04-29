@@ -1,0 +1,59 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Report Detail - MediConnect</title>
+    <link
+      rel="stylesheet"
+      href="{% static 'dashboard/css/doctor-pages.css' %}"
+    />
+  </head>
+  <body>
+    <div class="patient-shell doctor-shell">
+      {% include "dashboard/components/doctor_sidebar.html" %}
+      <main class="content">
+        <header class="top-header">
+          <div>
+            <h1>Report Detail</h1>
+            <p>Review the selected report metrics.</p>
+          </div>
+          <a
+            class="notify-btn"
+            aria-label="Notifications"
+            href="{% url 'doctor_reports' %}"
+          >
+            <span>🔔</span>
+          </a>
+        </header>
+
+        <section class="patient-main">
+          <div class="page-head">
+            <div>
+              <h2>{{ report.title }}</h2>
+              <p>{{ report.period }}</p>
+            </div>
+            <a href="{% url 'doctor_reports' %}" class="ghost-btn">Back to Reports</a>
+          </div>
+
+          <section class="card-block">
+            <div class="card-block-head">
+              <h3>Report Insights</h3>
+            </div>
+            <article class="appointment-row">
+              <div class="appointment-meta">
+                <h4>{{ report.title }}</h4>
+                <p>{{ report.summary }}</p>
+                <div class="chips">
+                  <span>Period: {{ report.period }}</span>
+                  <span>Key metric: {{ report.metric }}</span>
+                </div>
+              </div>
+            </article>
+          </section>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

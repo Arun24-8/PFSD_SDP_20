@@ -622,6 +622,7 @@ def doctor_patient_detail(request, patient_index):
             "doctor_name": doctor_name,
             "active": "patients",
             "patient": patient,
+            "patient_index": patient_index,
         },
     )
 
@@ -754,6 +755,60 @@ def doctor_reports(request):
                 "patients": len(DOCTOR_PATIENTS),
                 "prescriptions": len(DOCTOR_E_PRESCRIPTIONS),
             },
+        },
+    )
+
+
+def doctor_generate_report(request):
+    doctor_name = request.session.get("doctor_name")
+    if not doctor_name:
+        return redirect("login")
+
+    completed_consultations = sum(
+        1 for appointment in DOCTOR_APPOINTMENTS
+        if appointment.get("status") == "COMPLETED"
+    )
+    pending_consultations = sum(
+        1 for appointment in DOCTOR_APPOINTMENTS
+        if appointment.get("status") == "PENDING"
+    )
+    report_data = {
+        "generated_at": datetime.now().strftime("%b %d, %Y %I:%M %p"),
+        "consultations": len(DOCTOR_APPOINTMENTS),
+        "completed_consultations": completed_consultations,
+        "pending_consultations": pending_consultations,
+        "patients": len(DOCTOR_PATIENTS),
+        "e_prescriptions": len(DOCTOR_E_PRESCRIPTIONS),
+        "summary": "Report generated using the latest appointment, patient, and prescription data.",
+    }
+
+    return render(
+        request,
+        "dashboard/pages/doctor/doctor_report_generated.html",
+        {
+            "doctor_name": doctor_name,
+            "active": "reports",
+            "report_data": report_data,
+        },
+    )
+
+
+def doctor_report_detail(request, report_index):
+    doctor_name = request.session.get("doctor_name")
+    if not doctor_name:
+        return redirect("login")
+
+    report = None
+    if 0 <= report_index < len(DOCTOR_REPORTS):
+        report = DOCTOR_REPORTS[report_index]
+
+    return render(
+        request,
+        "dashboard/pages/doctor/doctor_report_detail.html",
+        {
+            "doctor_name": doctor_name,
+            "active": "reports",
+            "report": report,
         },
     )
 

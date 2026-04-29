@@ -1,0 +1,87 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Report Generated - MediConnect</title>
+    <link
+      rel="stylesheet"
+      href="{% static 'dashboard/css/doctor-pages.css' %}"
+    />
+  </head>
+  <body>
+    <div class="patient-shell doctor-shell">
+      {% include "dashboard/components/doctor_sidebar.html" %}
+      <main class="content">
+        <header class="top-header">
+          <div>
+            <h1>Report Generated</h1>
+            <p>Your latest report has been created successfully.</p>
+          </div>
+          <a
+            class="notify-btn"
+            aria-label="Notifications"
+            href="{% url 'doctor_reports' %}"
+          >
+            <span>🔔</span>
+          </a>
+        </header>
+
+        <section class="patient-main">
+          <div class="page-head">
+            <div>
+              <h2>Report Summary</h2>
+              <p>Generated at {{ report_data.generated_at }}</p>
+            </div>
+            <div style="display: flex; gap: 10px">
+              <a href="{% url 'doctor_reports' %}" class="ghost-btn">Back to Reports</a>
+              <a href="{% url 'doctor_patients' %}" class="ghost-btn">View Patients</a>
+            </div>
+          </div>
+
+          <section class="card-block">
+            <div class="card-block-head">
+              <h3>Latest Report</h3>
+            </div>
+            <article class="appointment-row">
+              <div class="date-card">
+                <span>Consultations</span>
+                <strong>{{ report_data.consultations }}</strong>
+              </div>
+              <div class="appointment-meta">
+                <h4>Appointments</h4>
+                <p>{{ report_data.completed_consultations }} completed • {{ report_data.pending_consultations }} pending</p>
+              </div>
+              <span class="status-chip">Live</span>
+            </article>
+
+            <article class="appointment-row">
+              <div class="date-card">
+                <span>Patients</span>
+                <strong>{{ report_data.patients }}</strong>
+              </div>
+              <div class="appointment-meta">
+                <h4>Current caseload</h4>
+                <p>Active patient records available</p>
+              </div>
+              <span class="status-chip">Live</span>
+            </article>
+
+            <article class="appointment-row">
+              <div class="date-card">
+                <span>Prescriptions</span>
+                <strong>{{ report_data.e_prescriptions }}</strong>
+              </div>
+              <div class="appointment-meta">
+                <h4>E-Prescriptions</h4>
+                <p>{{ report_data.summary }}</p>
+              </div>
+              <span class="status-chip">Live</span>
+            </article>
+          </section>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>
