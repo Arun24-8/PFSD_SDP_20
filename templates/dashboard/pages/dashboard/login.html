@@ -34,9 +34,6 @@
 
         <form class="login-form" method="post">
           {% csrf_token %}
-          {% if error %}
-          <div class="form-error">{{ error }}</div>
-          {% endif %}
 
           <div class="role-selector">
             <label>I am a...</label>
@@ -46,7 +43,7 @@
                 name="role"
                 id="role-patient"
                 value="patient"
-                {% if request.POST.role == 'patient' or not request.POST.role %}checked{% endif %}
+                checked
               />
               <label for="role-patient" class="role-btn">
                 <svg
@@ -64,7 +61,7 @@
                 <span>Patient</span>
               </label>
 
-              <input type="radio" name="role" id="role-doctor" value="doctor" {% if request.POST.role == 'doctor' %}checked{% endif %} />
+              <input type="radio" name="role" id="role-doctor" value="doctor" />
               <label for="role-doctor" class="role-btn">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -80,7 +77,7 @@
                 <span>Doctor</span>
               </label>
 
-              <input type="radio" name="role" id="role-admin" value="admin" {% if request.POST.role == 'admin' %}checked{% endif %} />
+              <input type="radio" name="role" id="role-admin" value="admin" />
               <label for="role-admin" class="role-btn">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -107,13 +104,12 @@
           </div>
 
           <div class="form-field">
-            <label for="email">Username or Email</label>
+            <label for="email">Email address</label>
             <input
-              type="text"
+              type="email"
               id="email"
               name="email"
-              placeholder="admin or user@example.com"
-              value="{{ request.POST.email }}"
+              placeholder="user@example.com"
               required
             />
           </div>
@@ -130,35 +126,7 @@
           </div>
 
           <button type="submit" class="btn-signin">Sign in</button>
-        
-        <div class="login-actions" id="login-actions">
-          <a href="{% url 'forgot_password' %}" class="action-link">Forgot password?</a>
-          <a href="{% url 'create_user' %}" class="action-link">Create user</a>
-        </div>
         </form>
-        <script>
-          (function(){
-            const patientRadio = document.getElementById('role-patient');
-            const doctorRadio = document.getElementById('role-doctor');
-            const adminRadio = document.getElementById('role-admin');
-            const actions = document.getElementById('login-actions');
-
-            function updateActions(){
-              if(patientRadio.checked){
-                actions.style.display = 'flex';
-              } else {
-                actions.style.display = 'none';
-              }
-            }
-
-            // initial
-            updateActions();
-
-            [patientRadio, doctorRadio, adminRadio].forEach(r => {
-              r.addEventListener('change', updateActions);
-            });
-          })();
-        </script>
       </div>
 
       <button class="floating-help" aria-label="Help">

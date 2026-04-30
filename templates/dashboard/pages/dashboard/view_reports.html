@@ -56,26 +56,32 @@
               <h2>Analytics & Reports</h2>
               <p>Monitor system performance and user activity</p>
             </div>
-            <a href="{% url 'generate_report' %}?report_type={{ report_type }}" class="primary-btn">Generate Report</a>
+            <button class="primary-btn">Generate Report</button>
           </div>
 
-          <form class="filter-bar" method="get" action="">
-            <select name="report_type" id="report_type" class="filter-select">
-              <option value="daily" {% if report_type == 'daily' %}selected{% endif %}>Daily</option>
-              <option value="weekly" {% if report_type == 'weekly' or not report_type %}selected{% endif %}>Weekly</option>
-              <option value="monthly" {% if report_type == 'monthly' %}selected{% endif %}>Monthly</option>
-              <option value="yearly" {% if report_type == 'yearly' %}selected{% endif %}>Yearly</option>
+          <div class="filter-bar">
+            <select class="filter-select">
+              <option>Daily</option>
+              <option>Weekly</option>
+              <option>Monthly</option>
+              <option>Yearly</option>
             </select>
-            <button class="primary-btn" type="submit">Apply</button>
-          </form>
+            <select class="filter-select">
+              <option>Last 7 Days</option>
+              <option>Last 30 Days</option>
+              <option>Last 90 Days</option>
+              <option>Custom Range</option>
+            </select>
+            <button class="primary-btn">Export</button>
+          </div>
 
           <div class="stats-grid">
             <article class="stat-card">
               <div class="stat-icon">📊</div>
               <div class="stat-copy">
                 <h3>CONSULTATIONS</h3>
-                <strong>{{ consultations }}</strong>
-                <span>{{ start_date }} to {{ end_date }}</span>
+                <strong>487</strong>
+                <span>This Month</span>
               </div>
             </article>
 
@@ -83,8 +89,8 @@
               <div class="stat-icon green">💳</div>
               <div class="stat-copy">
                 <h3>REVENUE</h3>
-                <strong>${{ revenue }}</strong>
-                <span>{{ start_date }} to {{ end_date }}</span>
+                <strong>$12,450</strong>
+                <span>This Month</span>
               </div>
             </article>
 
@@ -92,7 +98,7 @@
               <div class="stat-icon blue">⭐</div>
               <div class="stat-copy">
                 <h3>AVG RATING</h3>
-                <strong>{{ avg_rating }}</strong>
+                <strong>4.8</strong>
                 <span>Out of 5</span>
               </div>
             </article>
@@ -101,8 +107,8 @@
               <div class="stat-icon purple">📈</div>
               <div class="stat-copy">
                 <h3>GROWTH</h3>
-                <strong>{% if growth is not None %}{{ growth }}%{% else %}N/A{% endif %}</strong>
-                <span>Vs Previous Period</span>
+                <strong>+23%</strong>
+                <span>Month over Month</span>
               </div>
             </article>
           </div>
@@ -111,15 +117,18 @@
             <section class="panel full-width">
               <div class="panel-head">
                 <h3>Consultation Trends</h3>
-                <a href="{% url 'view_reports_detail' %}?report_type={{ report_type }}">View detailed</a>
+                <a href="#">View detailed</a>
               </div>
 
               <div class="report-placeholder">
                 <p>Chart: Consultation trends over time</p>
                 <div class="chart-bar">
-                  {% for item in trend %}
-                    <div class="bar" style="height: {{ item.pct }}%">{{ item.date|slice:5 }}</div>
-                  {% endfor %}
+                  <div class="bar" style="height: 60%">Jan</div>
+                  <div class="bar" style="height: 75%">Feb</div>
+                  <div class="bar" style="height: 85%">Mar</div>
+                  <div class="bar" style="height: 70%">Apr</div>
+                  <div class="bar" style="height: 90%">May</div>
+                  <div class="bar" style="height: 95%">Jun</div>
                 </div>
               </div>
             </section>
@@ -127,7 +136,7 @@
             <section class="panel">
               <div class="panel-head">
                 <h3>Top Doctors</h3>
-                <a href="{% url 'view_top_doctors' %}">View all</a>
+                <a href="#">View all</a>
               </div>
 
               <article class="report-row">
@@ -170,6 +179,7 @@
             <section class="panel">
               <div class="panel-head">
                 <h3>User Growth</h3>
+                <a href="#">Details</a>
               </div>
 
               <article class="report-row">
@@ -220,16 +230,5 @@
         </section>
       </main>
     </div>
-    <script>
-      document.addEventListener('DOMContentLoaded', function(){
-        var sel = document.getElementById('report_type');
-        if(sel){
-          sel.addEventListener('change', function(){
-            // submit the surrounding form
-            sel.form.submit();
-          });
-        }
-      });
-    </script>
   </body>
 </html>
