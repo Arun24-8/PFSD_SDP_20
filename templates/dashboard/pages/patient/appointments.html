@@ -10,7 +10,7 @@
       href="{% static 'dashboard/css/patient-pages.css' %}"
     />
   </head>
-  <body>
+  <body class="patient-appointments-page">
     <div class="patient-shell">
       <aside class="sidebar">
         <div class="brand-wrap">
@@ -99,7 +99,7 @@
                   </div>
                 </div>
 
-                <div style="display: grid; gap: 10px; align-items: center;">
+                <div class="appointment-actions">
                   <span class="status-pill">{{ appointment.status_label }}</span>
                   <button
                     type="button"
@@ -109,7 +109,7 @@
                     data-specialist="{{ appointment.specialist }}"
                     data-time="{{ appointment.time }}"
                   >
-                    {% if appointment.join_available %}Join Call{% else %}Awaiting Confirmation{% endif %}
+                    {{ appointment.join_label }}
                   </button>
                 </div>
               </article>

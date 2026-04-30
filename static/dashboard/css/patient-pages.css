@@ -340,7 +340,9 @@ body {
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
-  white-space: nowrap;
+  max-width: 240px;
+  white-space: normal;
+  line-height: 1.25;
   background: linear-gradient(90deg, #0b6f99, #1387b4);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
@@ -1099,5 +1101,194 @@ body {
 @media (max-width: 960px) {
   .prescription-detail-page .prescription-detail-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+.content {
+  min-width: 0;
+}
+
+.patient-appointments-page {
+  background: #e6f3f8;
+}
+
+.patient-appointments-page .patient-main {
+  width: min(1180px, 100%);
+  padding: 32px;
+}
+
+.patient-appointments-page .page-head {
+  align-items: flex-start;
+  padding: 28px;
+  background: #f6fbfe;
+  border: 1px solid #d8e8f2;
+  border-radius: 18px;
+  box-shadow: 0 18px 42px rgba(21, 80, 120, 0.08);
+}
+
+.patient-appointments-page .page-head > div {
+  min-width: 0;
+}
+
+.patient-appointments-page .page-head h2 {
+  color: #082b55;
+  font-size: 34px;
+  line-height: 1.15;
+}
+
+.patient-appointments-page .page-head p {
+  max-width: 620px;
+  color: #56728f;
+  font-size: 17px;
+  line-height: 1.55;
+}
+
+.patient-appointments-page .primary-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  white-space: normal;
+  text-align: center;
+  box-shadow: 0 14px 28px rgba(16, 122, 188, 0.18);
+}
+
+.patient-appointments-page .booking-date-picker-main {
+  width: fit-content;
+  max-width: 100%;
+  margin-top: 18px;
+  padding: 14px 18px;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid #d8e8f2;
+  border-radius: 16px;
+}
+
+.patient-appointments-page .booking-date-picker label {
+  color: #345b7f;
+  font-size: 16px;
+}
+
+.patient-appointments-page .booking-date-input {
+  min-width: 164px;
+  min-height: 44px;
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 14px;
+  color: #0f2748;
+  outline: none;
+}
+
+.patient-appointments-page .booking-date-input:focus {
+  border-color: #72bdd8;
+  box-shadow: 0 0 0 4px rgba(16, 182, 209, 0.14);
+}
+
+.patient-appointments-page .card-block {
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 18px 42px rgba(20, 79, 121, 0.08);
+}
+
+.patient-appointments-page .card-block-head h3 {
+  color: #0e335a;
+  font-size: 20px;
+}
+
+.patient-appointments-page .appointment-row {
+  grid-template-columns: 88px minmax(0, 1fr) auto;
+  border-radius: 16px;
+  background: #fbfdff;
+}
+
+.patient-appointments-page .appointment-actions {
+  display: grid;
+  gap: 10px;
+  align-items: center;
+  justify-items: end;
+}
+
+.patient-appointments-page .date-card {
+  min-width: 0;
+  border-radius: 14px;
+  background: #eef8ff;
+}
+
+.patient-appointments-page .date-card span {
+  color: #147fa8;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+}
+
+.patient-appointments-page .date-card strong {
+  color: #0b2f57;
+  font-size: 34px;
+}
+
+.patient-appointments-page .status-pill,
+.patient-appointments-page .join-btn {
+  width: 100%;
+  min-width: 132px;
+}
+
+@media (max-width: 900px) {
+  .patient-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    position: static;
+    border-right: 0;
+    border-bottom: 1px solid #d6e2ec;
+  }
+
+  .patient-appointments-page .patient-main {
+    padding: 22px;
+  }
+
+  .patient-appointments-page .page-head {
+    padding: 22px;
+  }
+
+  .patient-appointments-page .page-head h2 {
+    font-size: 30px;
+  }
+}
+
+@media (max-width: 640px) {
+  .top-header,
+  .patient-appointments-page .patient-main {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .patient-appointments-page .page-head {
+    gap: 16px;
+  }
+
+  .patient-appointments-page .page-head h2 {
+    font-size: 28px;
+  }
+
+  .patient-appointments-page .page-head p {
+    font-size: 15px;
+  }
+
+  .patient-appointments-page .primary-btn,
+  .patient-appointments-page .booking-date-picker-main,
+  .patient-appointments-page .booking-date-input {
+    width: 100%;
+  }
+
+  .patient-appointments-page .booking-date-picker-main {
+    align-items: stretch;
+  }
+
+  .patient-appointments-page .appointment-row {
+    grid-template-columns: 1fr;
+  }
+
+  .patient-appointments-page .appointment-actions {
+    width: 100%;
+    justify-items: stretch;
   }
 }

@@ -24,22 +24,8 @@ urlpatterns = [
     path('login/', doctor_views.login, name='login'),
     path('signout/', doctor_views.signout, name='signout'),
 
-    # patient routes
-    path('patient/dashboard/', doctor_views.patient_dashboard, name='patient_dashboard'),
-    path('patient/appointments/', doctor_views.patient_appointments,
-         name='patient_appointments'),
-    path('patient/appointments/book/', doctor_views.patient_appointment_doctors,
-         name='patient_appointment_doctors'),
-    path('patient/prescriptions/', doctor_views.patient_prescriptions,
-         name='patient_prescriptions'),
-    path('patient/prescriptions/download/<int:prescription_index>/', doctor_views.patient_download_prescription,
-         name='patient_download_prescription'),
-    path('patient/prescriptions/<int:prescription_index>/', doctor_views.patient_prescription_detail,
-         name='patient_prescription_detail'),
-
-    # doctor app urls
+    path('patient/', include('patient.urls')),
     path('doctor/', include('doctor.urls')),
-
     path('admin/', include('admin_management.urls')),
     path('admin-panel/', admin.site.urls),
 ]
