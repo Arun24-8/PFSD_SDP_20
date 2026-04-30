@@ -5,10 +5,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Admin Dashboard - MediConnect</title>
-    <link
-      rel="stylesheet"
-      href="{% static 'dashboard/css/admin-dashboard.css' %}"
-    />
+    <link rel="stylesheet" href="{% static 'dashboard/css/admin-dashboard.css' %}?v=5" />
   </head>
   <body>
     <div class="admin-shell">
@@ -22,10 +19,10 @@
         </div>
 
         <nav class="side-nav" aria-label="Admin menu">
-          <a href="/admin/dashboard/" class="side-link active">Dashboard</a>
-          <a href="/admin/manage-users/" class="side-link">Manage Users</a>
-          <a href="/admin/reports/" class="side-link">Reports</a>
-          <a href="/admin/security/" class="side-link">Security</a>
+          <a href="{% url 'admin_dashboard' %}" class="side-link active">Dashboard</a>
+          <a href="{% url 'manage_users' %}" class="side-link">Manage Users</a>
+          <a href="{% url 'view_reports' %}" class="side-link">Reports</a>
+          <a href="{% url 'security_settings' %}" class="side-link">Security</a>
         </nav>
 
         <div class="sidebar-user">
@@ -43,7 +40,7 @@
         <header class="top-header">
           <div>
             <h1>Admin Dashboard</h1>
-            <p>System management and monitoring</p>
+            <p>Live system management and monitoring</p>
           </div>
           <button class="notify-btn" type="button" aria-label="Notifications">
             <span>🔔</span>
@@ -54,7 +51,7 @@
           <div class="welcome-head">
             <div>
               <h2>Welcome back, {{ admin_profile.user.first_name }}</h2>
-              <p>Here's your system overview</p>
+              <p>Here's your real-time system overview</p>
             </div>
           </div>
 
@@ -69,7 +66,7 @@
             </article>
 
             <article class="stat-card">
-              <div class="stat-icon green">👨‍⚕️</div>
+              <div class="stat-icon green">⚕</div>
               <div class="stat-copy">
                 <h3>DOCTORS</h3>
                 <strong>{{ stats.doctors }}</strong>
@@ -87,7 +84,7 @@
             </article>
 
             <article class="stat-card">
-              <div class="stat-icon purple">⚠️</div>
+              <div class="stat-icon purple">!</div>
               <div class="stat-copy">
                 <h3>ALERTS</h3>
                 <strong>{{ stats.alerts }}</strong>
@@ -96,7 +93,6 @@
             </article>
           </div>
 
-          <!-- patient-dashboard-derived statistics -->
           <div class="stats-grid">
             <article class="stat-card">
               <div class="stat-icon">📅</div>
@@ -115,7 +111,7 @@
               </div>
             </article>
             <article class="stat-card">
-              <div class="stat-icon purple">∿</div>
+              <div class="stat-icon purple">~</div>
               <div class="stat-copy">
                 <h3>TOTAL VISITS</h3>
                 <strong>{{ patient_stats.total_visits }}</strong>
@@ -128,102 +124,41 @@
             <section class="panel">
               <div class="panel-head">
                 <h3>Available Doctors</h3>
-                <a href="#">Manage</a>
+                <a href="{% url 'manage_users' %}?role=doctor">Manage</a>
               </div>
               {% for doc in doctor_list %}
               <article class="schedule-card">
                 <div class="schedule-main">
                   <h4>{{ doc.name }}</h4>
-                  <p>Rating: {{ doc.rating }}</p>
+                  <p>{{ doc.specialist_type }} • Rating: {{ doc.rating }}</p>
+                  <div class="meta-chips">
+                    <span>{{ doc.timings|default:"No timings set" }}</span>
+                  </div>
                 </div>
               </article>
               {% empty %}
-              <p>No doctors registered yet.</p>
+              <p class="empty-state">No doctors registered yet.</p>
               {% endfor %}
-            </section>
-          </div>
-
-          <div class="dashboard-grid">
-            <section class="panel">
-              <div class="panel-head">
-                <h3>System Status</h3>
-                <a href="#">Details</a>
-              </div>
-
-              <div class="status-item">
-                <div class="status-info">
-                  <h4>Database</h4>
-                  <p>PostgreSQL Server</p>
-                </div>
-                <span class="status-badge online">Online</span>
-              </div>
-
-              <div class="status-item">
-                <div class="status-info">
-                  <h4>API Server</h4>
-                  <p>Django REST API</p>
-                </div>
-                <span class="status-badge online">Online</span>
-              </div>
-
-              <div class="status-item">
-                <div class="status-info">
-                  <h4>Email Service</h4>
-                  <p>SMTP Configuration</p>
-                </div>
-                <span class="status-badge online">Online</span>
-              </div>
-
-              <div class="status-item">
-                <div class="status-info">
-                  <h4>File Storage</h4>
-                  <p>Media Server</p>
-                </div>
-                <span class="status-badge warning">Degraded</span>
-              </div>
             </section>
 
             <section class="panel">
               <div class="panel-head">
                 <h3>Recent Activity</h3>
-                <a href="#">View all</a>
+                <a href="{% url 'view_reports' %}">View all</a>
               </div>
 
+              {% for item in recent_activity %}
               <article class="activity-item">
                 <div class="activity-icon">✓</div>
                 <div class="activity-details">
-                  <h4>New Doctor Verified</h4>
-                  <p>Dr. Sarah Johnson verified</p>
-                  <span class="time">2 hours ago</span>
+                  <h4>{{ item.title }}</h4>
+                  <p>{{ item.summary }}</p>
+                  <span class="time">{{ item.time }}</span>
                 </div>
               </article>
-
-              <article class="activity-item">
-                <div class="activity-icon warning">!</div>
-                <div class="activity-details">
-                  <h4>Security Alert</h4>
-                  <p>Multiple failed login attempts detected</p>
-                  <span class="time">4 hours ago</span>
-                </div>
-              </article>
-
-              <article class="activity-item">
-                <div class="activity-icon">+</div>
-                <div class="activity-details">
-                  <h4>New Patient Registration</h4>
-                  <p>10 new patients registered today</p>
-                  <span class="time">6 hours ago</span>
-                </div>
-              </article>
-
-              <article class="activity-item">
-                <div class="activity-icon">📋</div>
-                <div class="activity-details">
-                  <h4>System Backup Completed</h4>
-                  <p>Daily backup successfully executed</p>
-                  <span class="time">8 hours ago</span>
-                </div>
-              </article>
+              {% empty %}
+              <p class="empty-state">No recent activity yet.</p>
+              {% endfor %}
             </section>
           </div>
         </section>

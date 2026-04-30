@@ -5,10 +5,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Manage Users - MediConnect</title>
-    <link
-      rel="stylesheet"
-      href="{% static 'dashboard/css/admin-dashboard.css' %}"
-    />
+    <link rel="stylesheet" href="{% static 'dashboard/css/admin-dashboard.css' %}?v=5" />
   </head>
   <body>
     <div class="admin-shell">
@@ -22,12 +19,10 @@
         </div>
 
         <nav class="side-nav" aria-label="Admin menu">
-          <a href="/admin/dashboard/" class="side-link">Dashboard</a>
-          <a href="/admin/manage-users/" class="side-link active"
-            >Manage Users</a
-          >
-          <a href="/admin/reports/" class="side-link">Reports</a>
-          <a href="/admin/security/" class="side-link">Security</a>
+          <a href="{% url 'admin_dashboard' %}" class="side-link">Dashboard</a>
+          <a href="{% url 'manage_users' %}" class="side-link active">Manage Users</a>
+          <a href="{% url 'view_reports' %}" class="side-link">Reports</a>
+          <a href="{% url 'security_settings' %}" class="side-link">Security</a>
         </nav>
 
         <div class="sidebar-user">
@@ -45,14 +40,10 @@
         <header class="top-header">
           <div>
             <h1>Manage Users</h1>
-            <p>Control and monitor all system users</p>
+            <p>Control doctors and patients separately</p>
           </div>
-          <a
-            class="notify-btn"
-            aria-label="Add Doctor"
-            href="{% url 'add_user' %}"
-          >
-            <span>➕</span>
+          <a class="notify-btn" aria-label="Add Doctor" href="{% url 'add_user' %}">
+            <span>+</span>
           </a>
         </header>
 
@@ -62,28 +53,32 @@
               <h2>User Management</h2>
               <p>View, edit, and manage system users</p>
             </div>
-            <a href="{% url 'add_user' %}" class="primary-btn"
-              >Add New Doctor</a
-            >
+            <a href="{% url 'add_user' %}" class="primary-btn">Add New Doctor</a>
           </div>
 
           {% if messages %}
           <div class="form-messages" aria-live="polite">
             {% for message in messages %}
-            <div
-              class="form-alert {% if message.tags %}{{ message.tags }}{% endif %}"
-            >
+            <div class="form-alert {% if message.tags %}{{ message.tags }}{% endif %}">
               {{ message }}
             </div>
             {% endfor %}
           </div>
           {% endif %}
 
-          <form
-            class="filter-bar"
-            method="get"
-            action="{% url 'manage_users' %}"
-          >
+          <div class="role-tabs">
+            <a href="{% url 'manage_users' %}?role=doctor" class="{% if selected_role == 'doctor' %}active{% endif %}">
+              Doctors <span>{{ doctor_total }}</span>
+            </a>
+            <a href="{% url 'manage_users' %}?role=patient" class="{% if selected_role == 'patient' %}active{% endif %}">
+              Patients <span>{{ patient_total }}</span>
+            </a>
+            <a href="{% url 'manage_users' %}" class="{% if selected_role == 'all' %}active{% endif %}">
+              All Users <span>{{ total_users }}</span>
+            </a>
+          </div>
+
+          <form class="filter-bar" method="get" action="{% url 'manage_users' %}">
             <input
               type="text"
               name="q"
@@ -92,100 +87,23 @@
               class="search-input"
             />
             <select class="filter-select" name="role">
-              <option
-                value="all"
-                {%
-                if
-                selected_role=""
-                ="all"
-                %}selected{%
-                endif
-                %}
-              >
-                All Roles
-              </option>
-              <option
-                value="admin"
-                {%
-                if
-                selected_role=""
-                ="admin"
-                %}selected{%
-                endif
-                %}
-              >
-                Admin
-              </option>
-              <option
-                value="doctor"
-                {%
-                if
-                selected_role=""
-                ="doctor"
-                %}selected{%
-                endif
-                %}
-              >
-                Doctor
-              </option>
-              <option
-                value="patient"
-                {%
-                if
-                selected_role=""
-                ="patient"
-                %}selected{%
-                endif
-                %}
-              >
-                Patient
-              </option>
+              <option value="all" {% if selected_role == "all" %}selected{% endif %}>All Roles</option>
+              <option value="admin" {% if selected_role == "admin" %}selected{% endif %}>Admin</option>
+              <option value="doctor" {% if selected_role == "doctor" %}selected{% endif %}>Doctor</option>
+              <option value="patient" {% if selected_role == "patient" %}selected{% endif %}>Patient</option>
             </select>
             <select class="filter-select" name="status">
-              <option
-                value="all"
-                {%
-                if
-                selected_status=""
-                ="all"
-                %}selected{%
-                endif
-                %}
-              >
-                All Status
-              </option>
-              <option
-                value="active"
-                {%
-                if
-                selected_status=""
-                ="active"
-                %}selected{%
-                endif
-                %}
-              >
-                Active
-              </option>
-              <option
-                value="inactive"
-                {%
-                if
-                selected_status=""
-                ="inactive"
-                %}selected{%
-                endif
-                %}
-              >
-                Inactive
-              </option>
+              <option value="all" {% if selected_status == "all" %}selected{% endif %}>All Status</option>
+              <option value="active" {% if selected_status == "active" %}selected{% endif %}>Active</option>
+              <option value="inactive" {% if selected_status == "inactive" %}selected{% endif %}>Inactive</option>
             </select>
             <button type="submit" class="primary-btn">Apply</button>
           </form>
 
           <section class="panel">
             <div class="panel-head">
-              <h3>All Users</h3>
-              <p>Total: {{ users.count }}</p>
+              <h3>{% if selected_role == "doctor" %}Doctors{% elif selected_role == "patient" %}Patients{% else %}All Users{% endif %}</h3>
+              <p>Total: {{ total_users }}</p>
             </div>
 
             <div class="table-wrapper">
@@ -205,25 +123,19 @@
                   <tr>
                     <td>
                       <div class="user-cell">
-                        <div class="user-avatar">
-                          {{ user.first_name|slice:":1"|upper }}
-                        </div>
+                        <div class="user-avatar">{{ user.first_name|slice:":1"|upper }}</div>
                         <div>
-                          <strong
-                            >{{ user.first_name }} {{ user.last_name }}</strong
-                          >
+                          <strong>{{ user.first_name }} {{ user.last_name }}</strong>
                           <span class="user-id">#{{ user.id }}</span>
                         </div>
                       </div>
                     </td>
                     <td>{{ user.email }}</td>
                     <td>
-                      {% if user.is_staff %}
+                      {% if user.display_role == "admin" %}
                       <span class="role-badge admin">Admin</span>
-                      {% elif user.groups.first %}
-                      <span class="role-badge"
-                        >{{ user.groups.first.name }}</span
-                      >
+                      {% elif user.display_role == "doctor" %}
+                      <span class="role-badge">Doctor</span>
                       {% else %}
                       <span class="role-badge patient">Patient</span>
                       {% endif %}
@@ -238,30 +150,21 @@
                     <td>{{ user.date_joined|date:"M d, Y" }}</td>
                     <td>
                       <div class="action-buttons">
-                        <a
-                          class="btn-icon"
-                          href="{% url 'edit_user' user.id %}"
-                          title="Edit"
-                          >✏️</a
-                        >
-                        <a
-                          class="btn-icon"
-                          href="{% url 'view_user' user.id %}"
-                          title="View"
-                          >👁️</a
-                        >
+                        <a class="btn-icon" href="{% url 'edit_user' user.id %}" title="Edit">✎</a>
+                        <a class="btn-icon" href="{% url 'view_user' user.id %}" title="View">◉</a>
                         <form
                           method="post"
                           action="{% url 'delete_user' user.id %}"
-                          onsubmit="return confirm('Delete this user?');"
+                          {% if user.can_delete_user %}onsubmit="return confirm('Delete this user?');"{% endif %}
                         >
                           {% csrf_token %}
                           <button
-                            class="btn-icon danger"
-                            title="Delete"
+                            class="btn-icon danger {% if not user.can_delete_user %}disabled{% endif %}"
+                            title="{% if user.can_delete_user %}Delete{% else %}{{ user.delete_disabled_reason }}{% endif %}"
                             type="submit"
+                            {% if not user.can_delete_user %}disabled{% endif %}
                           >
-                            🗑️
+                            🗑
                           </button>
                         </form>
                       </div>

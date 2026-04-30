@@ -5,10 +5,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Reports - MediConnect</title>
-    <link
-      rel="stylesheet"
-      href="{% static 'dashboard/css/admin-dashboard.css' %}"
-    />
+    <link rel="stylesheet" href="{% static 'dashboard/css/admin-dashboard.css' %}?v=5" />
   </head>
   <body>
     <div class="admin-shell">
@@ -22,10 +19,10 @@
         </div>
 
         <nav class="side-nav" aria-label="Admin menu">
-          <a href="/admin/dashboard/" class="side-link">Dashboard</a>
-          <a href="/admin/manage-users/" class="side-link">Manage Users</a>
-          <a href="/admin/reports/" class="side-link active">Reports</a>
-          <a href="/admin/security/" class="side-link">Security</a>
+          <a href="{% url 'admin_dashboard' %}" class="side-link">Dashboard</a>
+          <a href="{% url 'manage_users' %}" class="side-link">Manage Users</a>
+          <a href="{% url 'view_reports' %}" class="side-link active">Reports</a>
+          <a href="{% url 'security_settings' %}" class="side-link">Security</a>
         </nav>
 
         <div class="sidebar-user">
@@ -43,72 +40,69 @@
         <header class="top-header">
           <div>
             <h1>System Reports</h1>
-            <p>View system analytics and performance data</p>
+            <p>Live analytics from appointments, users, doctors, and prescriptions</p>
           </div>
-          <button class="notify-btn" type="button" aria-label="Download Report">
-            <span>⬇️</span>
-          </button>
+          <a class="notify-btn" aria-label="Download Report" href="{% url 'view_reports' %}?report_type={{ report_type }}&generate=pdf">
+            <span>↓</span>
+          </a>
         </header>
 
         <section class="dashboard-main">
           <div class="welcome-head">
             <div>
               <h2>Analytics & Reports</h2>
-              <p>Monitor system performance and user activity</p>
+              <p>{{ report.period_label }}: {{ report.start_date }} to {{ report.end_date }}</p>
             </div>
-            <button class="primary-btn">Generate Report</button>
+            <a class="primary-btn" href="{% url 'view_reports' %}?report_type={{ report_type }}&generate=pdf">
+              Generate Report
+            </a>
           </div>
 
-          <div class="filter-bar">
-            <select class="filter-select">
-              <option>Daily</option>
-              <option>Weekly</option>
-              <option>Monthly</option>
-              <option>Yearly</option>
+          <form class="filter-bar" method="get" action="{% url 'view_reports' %}">
+            <select class="filter-select" name="report_type">
+              <option value="daily" {% if report_type == "daily" %}selected{% endif %}>Daily</option>
+              <option value="weekly" {% if report_type == "weekly" %}selected{% endif %}>Weekly</option>
+              <option value="monthly" {% if report_type == "monthly" %}selected{% endif %}>Monthly</option>
+              <option value="yearly" {% if report_type == "yearly" %}selected{% endif %}>Yearly</option>
             </select>
-            <select class="filter-select">
-              <option>Last 7 Days</option>
-              <option>Last 30 Days</option>
-              <option>Last 90 Days</option>
-              <option>Custom Range</option>
-            </select>
-            <button class="primary-btn">Export</button>
-          </div>
+            <button class="primary-btn" type="submit">Show Report</button>
+            <a class="btn-secondary-link" href="{% url 'view_reports' %}?report_type={{ report_type }}&export=1">Export CSV</a>
+          </form>
 
           <div class="stats-grid">
             <article class="stat-card">
               <div class="stat-icon">📊</div>
               <div class="stat-copy">
                 <h3>CONSULTATIONS</h3>
-                <strong>487</strong>
-                <span>This Month</span>
+                <strong>{{ report.consultations }}</strong>
+                <span>{{ report.period_label }}</span>
               </div>
             </article>
 
             <article class="stat-card">
-              <div class="stat-icon green">💳</div>
+              <div class="stat-icon green">₹</div>
               <div class="stat-copy">
                 <h3>REVENUE</h3>
-                <strong>$12,450</strong>
-                <span>This Month</span>
+                <strong>₹{{ report.revenue }}</strong>
+                <span>Estimated</span>
               </div>
             </article>
 
             <article class="stat-card">
-              <div class="stat-icon blue">⭐</div>
+              <div class="stat-icon blue">★</div>
               <div class="stat-copy">
                 <h3>AVG RATING</h3>
-                <strong>4.8</strong>
+                <strong>{{ report.avg_rating|floatformat:1 }}</strong>
                 <span>Out of 5</span>
               </div>
             </article>
 
             <article class="stat-card">
-              <div class="stat-icon purple">📈</div>
+              <div class="stat-icon purple">↗</div>
               <div class="stat-copy">
                 <h3>GROWTH</h3>
-                <strong>+23%</strong>
-                <span>Month over Month</span>
+                <strong>{{ report.growth }}</strong>
+                <span>Previous period</span>
               </div>
             </article>
           </div>
@@ -117,18 +111,18 @@
             <section class="panel full-width">
               <div class="panel-head">
                 <h3>Consultation Trends</h3>
-                <a href="#">View detailed</a>
+                <p>{{ report.period_label }}</p>
               </div>
 
               <div class="report-placeholder">
-                <p>Chart: Consultation trends over time</p>
+                <p>Consultations by period</p>
                 <div class="chart-bar">
-                  <div class="bar" style="height: 60%">Jan</div>
-                  <div class="bar" style="height: 75%">Feb</div>
-                  <div class="bar" style="height: 85%">Mar</div>
-                  <div class="bar" style="height: 70%">Apr</div>
-                  <div class="bar" style="height: 90%">May</div>
-                  <div class="bar" style="height: 95%">Jun</div>
+                  {% for point in report.trend_points %}
+                  <div class="bar" style="height: {{ point.height }}%">
+                    <strong>{{ point.count }}</strong>
+                    <span>{{ point.label }}</span>
+                  </div>
+                  {% endfor %}
                 </div>
               </div>
             </section>
@@ -136,50 +130,27 @@
             <section class="panel">
               <div class="panel-head">
                 <h3>Top Doctors</h3>
-                <a href="#">View all</a>
+                <p>By consultations</p>
               </div>
 
+              {% for doctor in report.top_doctors %}
               <article class="report-row">
-                <div class="rank">1</div>
+                <div class="rank">{{ doctor.rank }}</div>
                 <div class="doctor-info">
-                  <h4>Dr. Sarah Johnson</h4>
-                  <p>85 consultations</p>
+                  <h4>{{ doctor.name }}</h4>
+                  <p>{{ doctor.specialist }} • {{ doctor.consultations }} consultations</p>
                 </div>
-                <span class="rating">⭐ 4.9</span>
+                <span class="rating">★ {{ doctor.rating }}</span>
               </article>
-
-              <article class="report-row">
-                <div class="rank">2</div>
-                <div class="doctor-info">
-                  <h4>Dr. Michael Chen</h4>
-                  <p>72 consultations</p>
-                </div>
-                <span class="rating">⭐ 4.8</span>
-              </article>
-
-              <article class="report-row">
-                <div class="rank">3</div>
-                <div class="doctor-info">
-                  <h4>Dr. James Carter</h4>
-                  <p>68 consultations</p>
-                </div>
-                <span class="rating">⭐ 4.7</span>
-              </article>
-
-              <article class="report-row">
-                <div class="rank">4</div>
-                <div class="doctor-info">
-                  <h4>Dr. Emily Davis</h4>
-                  <p>61 consultations</p>
-                </div>
-                <span class="rating">⭐ 4.6</span>
-              </article>
+              {% empty %}
+              <p class="empty-state">No doctor activity for this period.</p>
+              {% endfor %}
             </section>
 
             <section class="panel">
               <div class="panel-head">
                 <h3>User Growth</h3>
-                <a href="#">Details</a>
+                <p>Live user data</p>
               </div>
 
               <article class="report-row">
@@ -188,41 +159,37 @@
                   <p>All registered users</p>
                 </div>
                 <div class="growth-stats">
-                  <strong>1,245</strong>
-                  <span class="green">+12%</span>
+                  <strong>{{ report.total_users }}</strong>
                 </div>
               </article>
 
               <article class="report-row">
                 <div class="growth-label">
                   <h4>Active Users</h4>
-                  <p>Last 30 days</p>
+                  <p>Enabled accounts</p>
                 </div>
                 <div class="growth-stats">
-                  <strong>856</strong>
-                  <span class="green">+18%</span>
+                  <strong>{{ report.active_users }}</strong>
                 </div>
               </article>
 
               <article class="report-row">
                 <div class="growth-label">
                   <h4>New Registrations</h4>
-                  <p>This month</p>
+                  <p>{{ report.period_label }}</p>
                 </div>
                 <div class="growth-stats">
-                  <strong>143</strong>
-                  <span class="green">+5%</span>
+                  <strong>{{ report.new_users }}</strong>
                 </div>
               </article>
 
               <article class="report-row">
                 <div class="growth-label">
-                  <h4>Churn Rate</h4>
-                  <p>Inactive users</p>
+                  <h4>Inactive Users</h4>
+                  <p>Disabled accounts</p>
                 </div>
                 <div class="growth-stats">
-                  <strong>2.3%</strong>
-                  <span class="red">-1.2%</span>
+                  <strong>{{ report.inactive_users }}</strong>
                 </div>
               </article>
             </section>

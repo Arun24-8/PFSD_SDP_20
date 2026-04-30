@@ -128,7 +128,7 @@
                   data-specialist="{{ appointment.specialist }}"
                   data-time="{{ appointment.time }}"
                 >
-                  {% if appointment.join_available %}Join Call{% else %}Awaiting Confirmation{% endif %}
+                  {{ appointment.join_label }}
                 </button>
               </div>
             </article>

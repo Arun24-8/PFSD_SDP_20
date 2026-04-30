@@ -5,7 +5,73 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Prescription Record - MediConnect</title>
-    <link rel="stylesheet" href="{% static 'dashboard/css/patient-pages.css' %}" />
+    <link rel="stylesheet" href="{% static 'dashboard/css/patient-pages.css' %}?v=5" />
+    <style>
+      .prescription-detail-page .card-block.prescription-detail-block {
+        overflow: hidden;
+        background: #ffffff;
+        border: 1px solid #d7e6f0;
+        border-radius: 18px;
+        box-shadow: 0 18px 40px rgba(15, 55, 96, 0.08);
+      }
+
+      .prescription-detail-page .card-block-head {
+        padding: 26px 30px;
+        background: #f8fbff;
+        border-bottom: 1px solid #e2edf5;
+      }
+
+      .prescription-detail-page .card-block-head h3 {
+        color: #061a3a;
+        font-size: 24px;
+      }
+
+      .prescription-detail-page .prescription-detail-grid {
+        display: grid;
+        grid-template-columns: 300px 1fr;
+        gap: 24px;
+        padding: 28px 30px 32px;
+      }
+
+      .prescription-detail-page .prescription-sidebar,
+      .prescription-detail-page .prescription-card {
+        border: 1px solid #dce8f2;
+        border-radius: 16px;
+        background: #ffffff;
+        padding: 22px;
+      }
+
+      .prescription-detail-page .prescription-keytext {
+        margin-top: 10px;
+        font-size: 22px;
+        font-weight: 800;
+        color: #071d42;
+      }
+
+      .prescription-detail-page .med-list {
+        list-style: none;
+        padding: 0;
+        margin: 20px 0 0;
+      }
+
+      .prescription-detail-page .med-list li {
+        border: 1px solid #deebf4;
+        background: #f8fbff;
+        border-radius: 14px;
+        padding: 16px 18px;
+      }
+
+      .prescription-detail-page .record-btn,
+      .prescription-detail-page .ghost-btn {
+        text-decoration: none;
+      }
+
+      @media (max-width: 900px) {
+        .prescription-detail-page .prescription-detail-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
   </head>
   <body>
     <div class="patient-shell">

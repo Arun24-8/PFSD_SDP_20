@@ -22,12 +22,12 @@
         </div>
 
         <nav class="side-nav" aria-label="Admin menu">
-          <a href="/admin/dashboard/" class="side-link">Dashboard</a>
-          <a href="/admin/manage-users/" class="side-link active"
+          <a href="{% url 'admin_dashboard' %}" class="side-link">Dashboard</a>
+          <a href="{% url 'manage_users' %}" class="side-link active"
             >Manage Users</a
           >
-          <a href="/admin/reports/" class="side-link">Reports</a>
-          <a href="/admin/security/" class="side-link">Security</a>
+          <a href="{% url 'view_reports' %}" class="side-link">Reports</a>
+          <a href="{% url 'security_settings' %}" class="side-link">Security</a>
         </nav>
 
         <div class="sidebar-user">

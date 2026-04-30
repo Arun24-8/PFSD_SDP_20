@@ -398,6 +398,51 @@ body {
   transform: translateY(-1px);
 }
 
+.role-tabs {
+  display: inline-flex;
+  gap: 10px;
+  margin: 0 0 18px;
+  padding: 6px;
+  border: 1px solid #dbe5ee;
+  border-radius: 14px;
+  background: #ffffff;
+}
+
+.role-tabs a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  color: #1d2a44;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.role-tabs a span {
+  min-width: 24px;
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: #edf2f7;
+  color: #64748b;
+  text-align: center;
+  font-size: 12px;
+}
+
+.role-tabs a.active {
+  background: #fff4ed;
+  color: #ea580c;
+  box-shadow: 0 8px 18px rgba(234, 88, 12, 0.12);
+}
+
+.btn-icon.disabled,
+.btn-icon:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  filter: grayscale(1);
+}
+
 .user-form-panel {
   max-width: 980px;
   margin: 0 auto;
@@ -988,20 +1033,33 @@ body {
   align-items: flex-end;
   justify-content: center;
   gap: 12px;
-  height: 120px;
+  min-height: 180px;
+  overflow-x: auto;
+  padding: 20px 8px 0;
 }
 
 .chart-bar .bar {
-  width: 30px;
+  width: 46px;
+  min-width: 46px;
   background: linear-gradient(180deg, #f97316, #ea580c);
-  border-radius: 4px 4px 0 0;
+  border-radius: 10px 10px 0 0;
   display: flex;
-  align-items: flex-end;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
+  gap: 5px;
   font-size: 11px;
   color: #ffffff;
   font-weight: 600;
-  padding-bottom: 8px;
+  padding: 8px 4px;
+}
+
+.chart-bar .bar strong {
+  font-size: 14px;
+}
+
+.chart-bar .bar span {
+  font-size: 10px;
 }
 
 /* ===== SETTINGS ===== */
@@ -1015,8 +1073,16 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 16px;
   padding: 16px 0;
   border-bottom: 1px solid #edf2f7;
+}
+
+.setting-item form,
+.alert-item form,
+.top-header form {
+  margin: 0;
+  flex-shrink: 0;
 }
 
 .setting-item.border-top {
@@ -1079,6 +1145,42 @@ body {
   left: 22px;
 }
 
+.toggle-form {
+  width: 54px;
+}
+
+.toggle-button {
+  width: 54px;
+  height: 30px;
+  border: 0;
+  border-radius: 999px;
+  background: #c9ced6;
+  padding: 3px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.toggle-button span {
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  background: #ffffff;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.24);
+  transition: transform 0.2s ease;
+}
+
+.toggle-button.on {
+  background: #2e7d32;
+  box-shadow: 0 8px 18px rgba(46, 125, 50, 0.18);
+}
+
+.toggle-button.on span {
+  transform: translateX(24px);
+}
+
 /* ===== ALERTS ===== */
 .alert-item {
   display: flex;
@@ -1089,6 +1191,20 @@ body {
   background: #f5f8fb;
   border-left: 4px solid #1f63e9;
   align-items: flex-start;
+}
+
+.alert-item .alert-info {
+  flex: 1;
+}
+
+.btn-small.secondary {
+  background: #f8fafc;
+  color: #1d2a44;
+  border: 1px solid #d9e3eb;
+}
+
+.btn-small.secondary:hover {
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12);
 }
 
 .alert-item.warning {
