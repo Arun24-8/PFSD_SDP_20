@@ -94,6 +94,8 @@
                 <a href="{% url 'patient_download_prescription' prescription.index %}" class="icon-btn" download>⇩</a>
               </div>
             </article>
+            {% empty %}
+            <p class="empty-state">No prescriptions available yet.</p>
             {% endfor %}
           </div>
         </section>

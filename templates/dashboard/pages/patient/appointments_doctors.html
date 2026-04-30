@@ -112,37 +112,27 @@
 
                 <p class="available">AVAILABLE TODAY</p>
                 <div class="time-slots">
+                  {% for slot in doctor.slots %}
                   <button
                     type="button"
                     class="time-slot-btn"
+                    data-doctor-id="{{ doctor.id }}"
                     data-doctor="{{ doctor.name }}"
                     data-specialist="{{ doctor.specialist }}"
                     data-city="{{ doctor.city }}"
-                    data-time="09:00 AM"
+                    data-time="{{ slot }}"
                   >
-                    09:00 AM
+                    {{ slot }}
                   </button>
-                  <button
-                    type="button"
-                    class="time-slot-btn"
-                    data-doctor="{{ doctor.name }}"
-                    data-specialist="{{ doctor.specialist }}"
-                    data-city="{{ doctor.city }}"
-                    data-time="11:00 AM"
-                  >
-                    11:00 AM
-                  </button>
-                  <button
-                    type="button"
-                    class="time-slot-btn"
-                    data-doctor="{{ doctor.name }}"
-                    data-specialist="{{ doctor.specialist }}"
-                    data-city="{{ doctor.city }}"
-                    data-time="02:00 PM"
-                  >
-                    02:00 PM
-                  </button>
+                  {% endfor %}
                 </div>
+              </div>
+            </article>
+            {% empty %}
+            <article class="doctor-card">
+              <div class="doctor-body">
+                <h4>No doctors available</h4>
+                <p class="specialist">Please check again after admin adds doctors.</p>
               </div>
             </article>
             {% endfor %}
@@ -150,6 +140,7 @@
 
           <script>
             (function () {
+              const csrfToken = "{{ csrf_token }}";
               const searchInput = document.getElementById("doctorSearchInput");
               const resultText = document.getElementById("doctorSearchResult");
               const dateInput = document.getElementById("appointmentDateInput");
@@ -159,8 +150,7 @@
               const slotButtons = Array.from(
                 document.querySelectorAll(".time-slot-btn"),
               );
-              const appointmentsPageUrl = "{% url 'patient_appointments' %}";
-              const appointmentListStorageKey = "patientBookedAppointments";
+              const bookingUrl = "{% url 'patient_appointment_doctors' %}";
 
               function todayDateValue() {
                 const now = new Date();
@@ -196,19 +186,6 @@
                   day: dayNumber,
                   isoDate: isoDate || todayDateValue(),
                 };
-              }
-
-              function loadAppointments() {
-                const raw = localStorage.getItem(appointmentListStorageKey);
-                if (!raw) {
-                  return [];
-                }
-                try {
-                  const parsed = JSON.parse(raw);
-                  return Array.isArray(parsed) ? parsed : [];
-                } catch (error) {
-                  return [];
-                }
               }
 
               dateInput.value = todayDateValue();
@@ -247,31 +224,29 @@
               slotButtons.forEach(function (button) {
                 button.addEventListener("click", function () {
                   const selectedDate = dateInput.value || todayDateValue();
-                  const dateParts = buildDateLabelParts(selectedDate);
-                  const booking = {
-                    doctor: button.getAttribute("data-doctor") || "Doctor",
-                    specialist:
-                      button.getAttribute("data-specialist") || "Specialist",
-                    city: button.getAttribute("data-city") || "",
-                    time: button.getAttribute("data-time") || "",
-                    dateLabel: dateParts.label,
-                    day: dateParts.day,
-                    dateISO: dateParts.isoDate,
+                  const form = document.createElement("form");
+                  form.method = "post";
+                  form.action = bookingUrl;
+
+                  const fields = {
+                    csrfmiddlewaretoken: csrfToken,
+                    doctor_id: button.getAttribute("data-doctor-id") || "",
+                    appointment_date: selectedDate,
+                    appointment_time: button.getAttribute("data-time") || "",
                     mode: "Video Call",
-                    status: "CONFIRMED",
+                    reason: "General consultation",
                   };
 
-                  const existingAppointments = loadAppointments();
-                  existingAppointments.push(booking);
-                  localStorage.setItem(
-                    appointmentListStorageKey,
-                    JSON.stringify(existingAppointments),
-                  );
-                  localStorage.setItem(
-                    "patientBookedAppointment",
-                    JSON.stringify(booking),
-                  );
-                  window.location.href = appointmentsPageUrl;
+                  Object.entries(fields).forEach(function ([name, value]) {
+                    const input = document.createElement("input");
+                    input.type = "hidden";
+                    input.name = name;
+                    input.value = value;
+                    form.appendChild(input);
+                  });
+
+                  document.body.appendChild(form);
+                  form.submit();
                 });
               });
             })();

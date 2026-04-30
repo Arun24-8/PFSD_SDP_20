@@ -82,6 +82,117 @@
       .medicine-tick.checked span:last-child {
         color: #16a34a;
       }
+
+      .prescription-form {
+        display: grid;
+        gap: 18px;
+        margin-bottom: 24px;
+        padding: 22px;
+        border: 1px solid #d2ddea;
+        border-radius: 12px;
+        background: #f7fbff;
+      }
+
+      .prescription-form h3 {
+        margin: 0;
+        color: #0f172a;
+      }
+
+      .form-grid {
+        display: grid;
+        grid-template-columns: minmax(240px, 1fr) 220px;
+        gap: 16px;
+      }
+
+      .field {
+        display: grid;
+        gap: 6px;
+      }
+
+      .field label {
+        color: #475569;
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .field input,
+      .field select {
+        width: 100%;
+        border: 1px solid #cbd5e1;
+        border-radius: 10px;
+        padding: 10px 12px;
+        font: inherit;
+        color: #0f172a;
+        background: #ffffff;
+      }
+
+      .medicine-rows {
+        display: grid;
+        gap: 12px;
+      }
+
+      .medicine-row {
+        display: grid;
+        grid-template-columns: minmax(220px, 1fr) minmax(210px, 260px) 42px;
+        gap: 12px;
+        align-items: end;
+        padding: 14px;
+        border: 1px solid #dbe6f2;
+        border-radius: 12px;
+        background: #ffffff;
+      }
+
+      .remove-row-btn {
+        width: 42px;
+        height: 42px;
+        border: 1px solid #dbe6f2;
+        border-radius: 10px;
+        background: #f8fafc;
+        color: #64748b;
+        font-size: 20px;
+        line-height: 1;
+        cursor: pointer;
+      }
+
+      .add-row-btn {
+        justify-self: start;
+        border: 1px solid #0f9fc6;
+        border-radius: 10px;
+        padding: 10px 14px;
+        background: #eaf8fc;
+        color: #08799a;
+        font-weight: 800;
+        cursor: pointer;
+      }
+
+      .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 12px;
+        padding-top: 4px;
+      }
+
+      .write-btn {
+        border: 0;
+        border-radius: 12px;
+        padding: 11px 18px;
+        background: #0c1934;
+        color: #ffffff;
+        font-weight: 800;
+        cursor: pointer;
+      }
+
+      @media (max-width: 760px) {
+        .form-grid,
+        .medicine-row {
+          grid-template-columns: 1fr;
+        }
+
+        .remove-row-btn {
+          width: 100%;
+        }
+      }
     </style>
   </head>
   <body>
@@ -111,10 +222,85 @@
                 Prescription {% endif %}
               </h2>
             </div>
-            <a href="{% url 'doctor_patients' %}" class="ghost-btn"
-              >Back to Patients</a
-            >
+            <div style="display: flex; gap: 10px; flex-wrap: wrap">
+              <a href="{% url 'doctor_patients' %}" class="ghost-btn"
+                >Back to Patients</a
+              >
+              <a href="{% url 'doctor_appointments' %}" class="ghost-btn"
+                >Appointments</a
+              >
+            </div>
           </div>
+
+          {% if patient %}
+          <form class="prescription-form" method="post">
+            {% csrf_token %}
+            <h3>Write Prescription</h3>
+
+            <div class="form-grid">
+              <div class="field">
+                <label for="diagnosis">Diagnosis</label>
+                <input
+                  id="diagnosis"
+                  name="diagnosis"
+                  type="text"
+                  placeholder="General consultation"
+                  required
+                />
+              </div>
+
+              <div class="field">
+                <label for="status">Status</label>
+                <select id="status" name="status">
+                  <option value="ACTIVE">Active</option>
+                  <option value="COMPLETED">Completed</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="medicine-rows" id="medicineRows">
+              <div class="medicine-row">
+                <div class="field">
+                  <label>Medicine</label>
+                  <input
+                    name="medicine_name"
+                    type="text"
+                    placeholder="Medicine name"
+                    required
+                  />
+                </div>
+
+                <div class="field">
+                  <label>Timing</label>
+                  <select name="medicine_note" required>
+                    <option value="">Select timing</option>
+                    <option value="Before breakfast">Before breakfast</option>
+                    <option value="After breakfast">After breakfast</option>
+                    <option value="Lunch">Lunch</option>
+                    <option value="Before dinner">Before dinner</option>
+                    <option value="After dinner">After dinner</option>
+                  </select>
+                </div>
+
+                <button
+                  type="button"
+                  class="remove-row-btn"
+                  aria-label="Remove medicine row"
+                  disabled
+                >
+                  -
+                </button>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="button" class="add-row-btn" id="addMedicineRow">
+                Add Row
+              </button>
+              <button type="submit" class="write-btn">Save Prescription</button>
+            </div>
+          </form>
+          {% endif %}
 
           <section class="card-block">
             <div class="card-block-head">
@@ -186,5 +372,45 @@
         </section>
       </main>
     </div>
+    <script>
+      const medicineRows = document.getElementById("medicineRows");
+      const addMedicineRow = document.getElementById("addMedicineRow");
+
+      function updateRemoveButtons() {
+        const rows = medicineRows.querySelectorAll(".medicine-row");
+        rows.forEach((row) => {
+          const button = row.querySelector(".remove-row-btn");
+          button.disabled = rows.length === 1;
+        });
+      }
+
+      function createMedicineRow() {
+        const row = medicineRows.querySelector(".medicine-row").cloneNode(true);
+        row.querySelectorAll("input").forEach((input) => {
+          input.value = "";
+        });
+        row.querySelectorAll("select").forEach((select) => {
+          select.value = "";
+        });
+        return row;
+      }
+
+      if (medicineRows && addMedicineRow) {
+        addMedicineRow.addEventListener("click", () => {
+          medicineRows.appendChild(createMedicineRow());
+          updateRemoveButtons();
+        });
+
+        medicineRows.addEventListener("click", (event) => {
+          if (!event.target.classList.contains("remove-row-btn")) {
+            return;
+          }
+          event.target.closest(".medicine-row").remove();
+          updateRemoveButtons();
+        });
+
+        updateRemoveButtons();
+      }
+    </script>
   </body>
 </html>

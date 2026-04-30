@@ -7,8 +7,72 @@
     <title>Doctor Dashboard - MediConnect</title>
     <link
       rel="stylesheet"
-      href="{% static 'dashboard/css/doctor-dashboard.css' %}"
+      href="{% static 'dashboard/css/doctor-dashboard.css' %}?v=9"
     />
+    <style>
+      .appointment-actions {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(94px, 1fr));
+        gap: 8px;
+        min-width: 204px;
+      }
+
+      .appointment-actions form {
+        grid-column: 1 / -1;
+        margin: 0;
+      }
+
+      .appointment-actions .action-btn {
+        appearance: none;
+        width: 100%;
+        min-height: 46px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 16px;
+        padding: 12px 16px;
+        font: inherit;
+        font-size: 13px;
+        font-weight: 800;
+        line-height: 1;
+        text-decoration: none;
+        cursor: pointer;
+      }
+
+      .appointment-actions .action-btn-light {
+        border: 1px solid #d7e1ec;
+        background: #ffffff;
+        color: #0c1934;
+        box-shadow: 0 8px 18px rgba(12, 25, 52, 0.08);
+      }
+
+      .appointment-actions .action-btn-dark {
+        border: 1px solid #0c1934;
+        background: #0c1934;
+        color: #ffffff;
+        box-shadow: 0 10px 20px rgba(12, 25, 52, 0.18);
+      }
+
+      .schedule-card .schedule-detail-btn {
+        appearance: none;
+        min-width: 104px;
+        min-height: 46px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #d7e1ec;
+        border-radius: 16px;
+        background: #ffffff;
+        color: #0c1934;
+        padding: 12px 16px;
+        font: inherit;
+        font-size: 13px;
+        font-weight: 800;
+        line-height: 1;
+        cursor: pointer;
+        box-shadow: 0 8px 18px rgba(12, 25, 52, 0.08);
+      }
+    </style>
   </head>
   <body>
     <div class="patient-shell doctor-shell">
@@ -62,11 +126,18 @@
 
                 <button
                   type="button"
-                  class="details-btn"
-                  onclick="location.href='{% url 'doctor_pending_patient_detail' forloop.counter0 %}'"
+                  class="action-btn action-btn-light schedule-detail-btn details-btn"
+                  onclick="location.href='{% url 'doctor_pending_patient_detail' item.appointment_index %}'"
                 >
                   Details
                 </button>
+              </article>
+              {% empty %}
+              <article class="schedule-card">
+                <div class="schedule-main">
+                  <h4>No schedule yet</h4>
+                  <p>Patient bookings will appear here after they request a slot.</p>
+                </div>
               </article>
               {% endfor %}
             </section>
@@ -92,14 +163,21 @@
                   </div>
                 </div>
 
-                <div style="display: flex; gap: 8px; align-items: center">
+                <div class="appointment-actions">
                   <button
                     type="button"
-                    class="details-btn"
+                    class="action-btn action-btn-light details-btn"
                     onclick="location.href='{% url 'doctor_pending_patient_detail' appt.appointment_index %}'"
                   >
                     Details
                   </button>
+
+                  <a
+                    href="{% url 'doctor_appointment_prescription' appt.appointment_index %}"
+                    class="action-btn action-btn-light prescription-btn"
+                  >
+                    Prescription
+                  </a>
 
                   <form
                     method="get"
@@ -107,11 +185,18 @@
                   >
                     <button
                       type="submit"
-                      class="join-btn {% if appt.join_enabled %}join-enabled{% endif %}"
+                      class="action-btn action-btn-dark join-btn {% if appt.join_enabled %}join-enabled{% endif %}"
                     >
                       Join Call
                     </button>
                   </form>
+                </div>
+              </article>
+              {% empty %}
+              <article class="schedule-card">
+                <div class="schedule-main">
+                  <h4>No appointments yet</h4>
+                  <p>You will only see appointments booked with your doctor profile.</p>
                 </div>
               </article>
               {% endfor %}

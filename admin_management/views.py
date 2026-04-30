@@ -58,7 +58,6 @@ def _email_from_name(full_name, domain):
 
 def _sync_users_from_dashboards():
     doctor_group, _ = Group.objects.get_or_create(name="Doctor")
-    patient_group, _ = Group.objects.get_or_create(name="Patient")
 
     from doctor.models import Doctor
     from django.db import utils as db_utils
@@ -67,12 +66,6 @@ def _sync_users_from_dashboards():
         doctor_names = set(Doctor.objects.values_list("name", flat=True))
     except db_utils.OperationalError:
         doctor_names = set()
-
-    from doctor.views import PATIENT_BOOKING_DOCTORS
-    for doctor_item in PATIENT_BOOKING_DOCTORS:
-        doctor_name = doctor_item.get("name")
-        if doctor_name:
-            doctor_names.add(doctor_name)
 
     for doctor_name in doctor_names:
         first_name, last_name = _split_name(doctor_name)
@@ -99,27 +92,6 @@ def _sync_users_from_dashboards():
             user.set_unusable_password()
             user.save(update_fields=["password"])
         user.groups.add(doctor_group)
-
-    from doctor.views import DOCTOR_PATIENTS
-
-    for patient in DOCTOR_PATIENTS:
-        patient_name = patient.get("name", "Patient")
-        first_name, last_name = _split_name(patient_name)
-        email = _email_from_name(patient_name, "patient.mediconnect.local")
-        user, created = User.objects.get_or_create(
-            username=email,
-            defaults={
-                "email": email,
-                "first_name": first_name,
-                "last_name": last_name,
-                "is_active": True,
-                "is_staff": False,
-            },
-        )
-        if created:
-            user.set_unusable_password()
-            user.save(update_fields=["password"])
-        user.groups.add(patient_group)
 
 
 def _apply_role_to_user(user, role):

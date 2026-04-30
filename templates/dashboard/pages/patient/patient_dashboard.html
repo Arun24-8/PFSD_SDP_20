@@ -89,7 +89,7 @@
               <div class="stat-icon purple">∿</div>
               <div class="stat-copy">
                 <h3>TOTAL VISITS</h3>
-                <strong>12</strong>
+                <strong>{{ total_visits }}</strong>
                 <span>Lifetime</span>
               </div>
             </article>
@@ -170,6 +170,8 @@
                   >Open Record</a>
                 </div>
               </article>
+              {% empty %}
+              <p class="empty-state">No prescriptions available yet.</p>
               {% endfor %}
             </section>
           </div>

@@ -31,7 +31,9 @@
               <h2>Patient Directory</h2>
               <p>Review active cases and follow-up requirements</p>
             </div>
-            <button type="button" class="ghost-btn">Export List</button>
+            <a href="{% url 'doctor_export_patients' %}" class="ghost-btn" download>
+              Export List
+            </a>
           </div>
 
           <div class="search-wrap">

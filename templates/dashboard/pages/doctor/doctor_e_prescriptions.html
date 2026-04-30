@@ -60,6 +60,8 @@
                 <button class="icon-btn" type="button">⇩</button>
               </div>
             </article>
+            {% empty %}
+            <p class="empty-state">No prescriptions issued yet.</p>
             {% endfor %}
           </div>
         </section>

@@ -38,9 +38,15 @@
               <a href="{% url 'doctor_patients' %}" class="ghost-btn"
                 >Patients</a
               >
+              {% if appointment_index %}
+              <a href="{% url 'doctor_appointment_prescription' appointment_index %}" class="ghost-btn"
+                >Prescription</a
+              >
+              {% else %}
               <a href="{% url 'doctor_patient_prescription' patient_index %}" class="ghost-btn"
                 >Prescription</a
               >
+              {% endif %}
               <a href="{% url 'doctor_appointments' %}" class="ghost-btn"
                 >Back to Appointments</a
               >
