@@ -1,0 +1,91 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Report Details - MediConnect</title>
+    <link rel="stylesheet" href="{% static 'dashboard/css/admin-dashboard.css' %}" />
+  </head>
+  <body>
+    <div class="admin-shell">
+      <aside class="sidebar">
+        <div class="brand-wrap">
+          <div class="brand-icon">⚙</div>
+          <div>
+            <h2>MediConnect</h2>
+            <p>ADMIN PANEL</p>
+          </div>
+        </div>
+
+        <nav class="side-nav" aria-label="Admin menu">
+          <a href="/admin/dashboard/" class="side-link">Dashboard</a>
+          <a href="/admin/manage-users/" class="side-link">Manage Users</a>
+          <a href="/admin/reports/" class="side-link active">Reports</a>
+          <a href="/admin/security/" class="side-link">Security</a>
+        </nav>
+
+        <div class="sidebar-user">
+          <div class="avatar admin-avatar">A</div>
+          <div class="sidebar-user-meta">
+            <strong>Administrator</strong>
+            <p>Admin</p>
+          </div>
+        </div>
+
+        <a href="{% url 'signout' %}" class="signout-btn">Sign Out</a>
+      </aside>
+
+      <main class="content">
+        <header class="top-header">
+          <div>
+            <h1>Report Details</h1>
+            <p>{{ start_date }} to {{ end_date }}</p>
+          </div>
+        </header>
+
+        <section class="dashboard-main">
+          <div class="panel full-width">
+            <div class="panel-head">
+              <h3>Appointments</h3>
+            </div>
+
+            <div class="panel-body">
+              <div class="table-wrap">
+                <table class="simple-table">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Date</th>
+                      <th>Time</th>
+                      <th>Doctor</th>
+                      <th>Patient</th>
+                      <th>Mode</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for appt in appointments %}
+                    <tr>
+                      <td>{{ forloop.counter }}</td>
+                      <td>{{ appt.date }}</td>
+                      <td>{{ appt.time }}</td>
+                      <td>{{ appt.doctor }}</td>
+                      <td>{{ appt.patient }}</td>
+                      <td>{{ appt.mode }}</td>
+                      <td>{{ appt.status }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="7">No appointments in this period.</td></tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

@@ -22,10 +22,13 @@ urlpatterns = [
     path('', doctor_views.home, name='home'),
     path('features/', doctor_views.features, name='features'),
     path('login/', doctor_views.login, name='login'),
+    path('forgot-password/', doctor_views.forgot_password, name='forgot_password'),
+    path('create-user/', doctor_views.create_user, name='create_user'),
     path('signout/', doctor_views.signout, name='signout'),
 
     # patient routes
-    path('patient/dashboard/', doctor_views.patient_dashboard, name='patient_dashboard'),
+    path('patient/dashboard/', doctor_views.patient_dashboard,
+         name='patient_dashboard'),
     path('patient/appointments/', doctor_views.patient_appointments,
          name='patient_appointments'),
     path('patient/appointments/book/', doctor_views.patient_appointment_doctors,

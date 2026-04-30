@@ -4,6 +4,8 @@ import random
 
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
+from django.contrib.auth import authenticate, login as auth_login
+from django.contrib.auth.models import User
 from datetime import datetime
 
 MONTH_MAP = {
@@ -228,20 +230,40 @@ def patient_prescription_detail(request, prescription_index):
 
 
 def login(request):
+    error = None
     if request.method == "POST":
         role = request.POST.get("role", "patient")
-        email = request.POST.get("email", "")
+        identifier = request.POST.get("email", "").strip()
+        password = request.POST.get("password", "")
 
+        # Allow login by either username or email.
+        user_record = User.objects.filter(username__iexact=identifier).first()
+        if user_record is None:
+            user_record = User.objects.filter(email__iexact=identifier).first()
+
+        user = None
+        if user_record is not None:
+            user = authenticate(
+                request, username=user_record.username, password=password)
+
+        if user is None:
+            # invalid credentials or user doesn't exist
+            error = "Invalid email or password."
+            return render(request, "dashboard/pages/dashboard/login.html", {"error": error, "request": request})
+
+        # successful authentication — log the user in
+        auth_login(request, user)
+
+        # set role-specific session values and ensure Doctor record exists
         if role == "patient":
-            request.session["patient_name"] = _name_from_email(email)
+            request.session["patient_name"] = _name_from_email(identifier)
             return redirect("patient_dashboard")
         elif role == "admin":
-            request.session["admin_name"] = _name_from_email(email)
+            request.session["admin_name"] = _name_from_email(identifier)
             return redirect("admin_dashboard")
         elif role == "doctor":
-            doctor_name = _name_from_email(email)
+            doctor_name = _name_from_email(identifier)
             request.session["doctor_name"] = doctor_name
-            # ensure a Doctor record exists with a rating; pick random if new
             try:
                 doctor_obj, created = Doctor.objects.get_or_create(
                     name=doctor_name)
@@ -249,7 +271,6 @@ def login(request):
                     doctor_obj.rating = round(random.uniform(4.0, 5.0), 2)
                     doctor_obj.save()
             except Exception as err:
-                # avoid crashing when table does not yet exist
                 from django.db import utils as db_utils
 
                 if isinstance(err, db_utils.OperationalError):
@@ -258,13 +279,68 @@ def login(request):
                     raise
             return redirect("doctor_dashboard")
         else:
+            # unknown role — log out and redirect home
             request.session.pop("patient_name", None)
             request.session.pop("admin_name", None)
             request.session.pop("doctor_name", None)
-
-        return redirect("home")
+            return redirect("home")
 
     return render(request, "dashboard/pages/dashboard/login.html")
+
+
+def forgot_password(request):
+    return render(request, "dashboard/pages/dashboard/forgot_password.html")
+
+
+def create_user(request):
+    error = None
+    success = None
+
+    if request.method == "POST":
+        full_name = request.POST.get("full_name", "").strip()
+        email = request.POST.get("email", "").strip()
+        password = request.POST.get("password", "").strip()
+
+        # Validation
+        if not full_name or len(full_name) < 2:
+            error = "Please enter a valid full name (at least 2 characters)."
+        elif not email or "@" not in email:
+            error = "Please enter a valid email address."
+        elif not password or len(password) < 6:
+            error = "Password must be at least 6 characters."
+        else:
+            # Check if email already exists
+            if User.objects.filter(email=email).exists():
+                error = "This email is already registered. Please use a different email."
+            else:
+                try:
+                    # Use the email as the username so login works with the same email.
+                    username = email.lower()
+
+                    # Create the user
+                    user = User.objects.create_user(
+                        username=username,
+                        email=email,
+                        password=password,
+                        first_name=full_name.split()[0],
+                        last_name=" ".join(full_name.split()[1:]) if len(
+                            full_name.split()) > 1 else ""
+                    )
+
+                    success = f"✓ Account created successfully! You can now log in with:\nEmail: {email}\nPassword: (the password you entered)"
+
+                except Exception as e:
+                    error = f"Error creating account: {str(e)}"
+
+        if error or success:
+            return render(request, "dashboard/pages/dashboard/create_user.html", {
+                "error": error,
+                "success": success,
+                "full_name": request.POST.get("full_name", ""),
+                "email": request.POST.get("email", "")
+            })
+
+    return render(request, "dashboard/pages/dashboard/create_user.html")
 
 
 # sample schedule items for a doctor; in a real app these would come from a model

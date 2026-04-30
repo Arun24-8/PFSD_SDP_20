@@ -2,6 +2,10 @@
 """Django's command-line utility for administrative tasks."""
 import os
 import sys
+import pymysql
+
+# Ensure PyMySQL provides the MySQLdb interface before Django loads DB backends
+pymysql.install_as_MySQLdb()
 
 
 def main():
