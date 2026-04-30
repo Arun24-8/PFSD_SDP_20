@@ -5,7 +5,7 @@ import random
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.contrib.auth import authenticate, login as auth_login
-from django.contrib.auth.models import User
+from django.contrib.auth.models import Group, User
 from datetime import datetime
 
 MONTH_MAP = {
@@ -309,8 +309,117 @@ def patient_prescription_detail(request, prescription_index):
 
 def login(request):
     error = None
+    success = None
+    form_mode = request.GET.get("mode", "signin").strip().lower()
+    if form_mode not in {"signin", "register", "forgot"}:
+        form_mode = "signin"
+    selected_role = request.GET.get("role", "patient").strip().lower()
+    if selected_role not in {"patient", "doctor", "admin"}:
+        selected_role = "patient"
+    if form_mode == "register":
+        selected_role = "patient"
+    if form_mode == "forgot" and selected_role == "admin":
+        selected_role = "patient"
     if request.method == "POST":
-        role = request.POST.get("role", "patient")
+        action = request.POST.get("action", "signin")
+        role = request.POST.get("role", "patient").strip().lower()
+        selected_role = role if role in {"patient", "doctor", "admin"} else "patient"
+
+        if action == "register":
+            form_mode = "register"
+            full_name = request.POST.get("full_name", "").strip()
+            username = request.POST.get("username", "").strip()
+            email = request.POST.get("email", "").strip().lower()
+            password = request.POST.get("password", "")
+            confirm_password = request.POST.get("confirm_password", "")
+            contact_number = request.POST.get("contact_number", "").strip()
+
+            if role != "patient":
+                error = "New accounts can be created from the Patient option only."
+            elif not full_name or not username or not email or not password or not confirm_password:
+                error = "Please fill all required fields."
+            elif password != confirm_password:
+                error = "Passwords do not match."
+            elif User.objects.filter(username__iexact=username).exists():
+                error = "This username is already taken."
+            elif User.objects.filter(email__iexact=email).exists():
+                error = "A user with this email already exists."
+            else:
+                first_name, _, last_name = full_name.partition(" ")
+                user = User.objects.create_user(
+                    username=username,
+                    email=email,
+                    password=password,
+                    first_name=first_name,
+                    last_name=last_name,
+                )
+                patient_group, _ = Group.objects.get_or_create(name="Patient")
+                user.groups.add(patient_group)
+                if contact_number:
+                    request.session["patient_contact_number"] = contact_number
+                return render(
+                    request,
+                    "dashboard/pages/dashboard/login.html",
+                    {
+                        "success": "Patient account created successfully. Please sign in.",
+                        "form_mode": "signin",
+                        "selected_role": "patient",
+                        "request": request,
+                    },
+                )
+
+            if error:
+                return render(
+                    request,
+                    "dashboard/pages/dashboard/login.html",
+                    {
+                        "error": error,
+                        "form_mode": form_mode,
+                        "selected_role": "patient",
+                        "request": request,
+                    },
+                )
+
+        if action == "forgot":
+            form_mode = "forgot"
+            identifier = request.POST.get("email", "").strip()
+            password = request.POST.get("password", "")
+            confirm_password = request.POST.get("confirm_password", "")
+
+            user_record = User.objects.filter(username__iexact=identifier).first()
+            if user_record is None:
+                user_record = User.objects.filter(email__iexact=identifier).first()
+
+            if role not in {"patient", "doctor"}:
+                error = "Password reset is available for patients and doctors only."
+            elif not identifier or not password or not confirm_password:
+                error = "Please enter your account email and new password."
+            elif password != confirm_password:
+                error = "Passwords do not match."
+            elif user_record is None:
+                error = "No account was found for that email or username."
+            elif role == "doctor" and not user_record.groups.filter(name="Doctor").exists():
+                error = "Doctor account not found. Please contact admin."
+            elif role == "patient" and (user_record.is_staff or user_record.groups.filter(name="Doctor").exists()):
+                error = "Patient account not found for those details."
+            else:
+                user_record.set_password(password)
+                user_record.save(update_fields=["password"])
+                success = "Password updated successfully. Please sign in."
+                form_mode = "signin"
+
+            return render(
+                request,
+                "dashboard/pages/dashboard/login.html",
+                {
+                    "error": error,
+                    "success": success,
+                    "form_mode": form_mode,
+                    "selected_role": selected_role,
+                    "request": request,
+                },
+            )
+
         identifier = request.POST.get("email", "").strip()
         password = request.POST.get("password", "")
 
@@ -325,7 +434,7 @@ def login(request):
 
         if user is None:
             error = "Invalid email or password."
-            return render(request, "dashboard/pages/dashboard/login.html", {"error": error, "request": request})
+            return render(request, "dashboard/pages/dashboard/login.html", {"error": error, "form_mode": "signin", "selected_role": selected_role, "request": request})
 
         # successful authentication — log the user in
         auth_login(request, user)
@@ -336,14 +445,14 @@ def login(request):
         elif role == "admin":
             if not user.is_staff:
                 error = "Admin access required."
-                return render(request, "dashboard/pages/dashboard/login.html", {"error": error, "request": request})
+                return render(request, "dashboard/pages/dashboard/login.html", {"error": error, "form_mode": "signin", "selected_role": selected_role, "request": request})
             request.session["admin_name"] = _name_from_email(identifier)
             return redirect("admin_dashboard")
         elif role == "doctor":
             # ensure the authenticated user is actually in the Doctor group
             if not user.groups.filter(name="Doctor").exists():
                 error = "Doctor account not found. Please contact admin."
-                return render(request, "dashboard/pages/dashboard/login.html", {"error": error, "request": request})
+                return render(request, "dashboard/pages/dashboard/login.html", {"error": error, "form_mode": "signin", "selected_role": selected_role, "request": request})
 
             # ensure a Doctor profile exists (must be provisioned by admin)
             from doctor.models import Doctor as DoctorModel
@@ -354,7 +463,7 @@ def login(request):
 
             if doctor_profile is None:
                 error = "Doctor profile not provisioned. Please contact admin."
-                return render(request, "dashboard/pages/dashboard/login.html", {"error": error, "request": request})
+                return render(request, "dashboard/pages/dashboard/login.html", {"error": error, "form_mode": "signin", "selected_role": selected_role, "request": request})
 
             request.session["doctor_name"] = doctor_profile.name
             return redirect("doctor_dashboard")
@@ -364,7 +473,7 @@ def login(request):
             request.session.pop("doctor_name", None)
             return redirect("home")
 
-    return render(request, "dashboard/pages/dashboard/login.html")
+    return render(request, "dashboard/pages/dashboard/login.html", {"form_mode": form_mode, "selected_role": selected_role})
 
 
 # sample schedule items for a doctor; in a real app these would come from a model
