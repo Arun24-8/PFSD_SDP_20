@@ -4,6 +4,8 @@ import random
 
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
+from django.contrib.auth import authenticate, login as auth_login
+from django.contrib.auth.models import User
 from datetime import datetime
 
 MONTH_MAP = {
@@ -228,41 +230,61 @@ def patient_prescription_detail(request, prescription_index):
 
 
 def login(request):
+    error = None
     if request.method == "POST":
         role = request.POST.get("role", "patient")
-        email = request.POST.get("email", "")
+        identifier = request.POST.get("email", "").strip()
+        password = request.POST.get("password", "")
+
+        # find user by username or email
+        user_record = User.objects.filter(username__iexact=identifier).first()
+        if user_record is None:
+            user_record = User.objects.filter(email__iexact=identifier).first()
+
+        user = None
+        if user_record is not None:
+            user = authenticate(request, username=user_record.username, password=password)
+
+        if user is None:
+            error = "Invalid email or password."
+            return render(request, "dashboard/pages/dashboard/login.html", {"error": error, "request": request})
+
+        # successful authentication — log the user in
+        auth_login(request, user)
 
         if role == "patient":
-            request.session["patient_name"] = _name_from_email(email)
+            request.session["patient_name"] = _name_from_email(identifier)
             return redirect("patient_dashboard")
         elif role == "admin":
-            request.session["admin_name"] = _name_from_email(email)
+            if not user.is_staff:
+                error = "Admin access required."
+                return render(request, "dashboard/pages/dashboard/login.html", {"error": error, "request": request})
+            request.session["admin_name"] = _name_from_email(identifier)
             return redirect("admin_dashboard")
         elif role == "doctor":
-            doctor_name = _name_from_email(email)
-            request.session["doctor_name"] = doctor_name
-            # ensure a Doctor record exists with a rating; pick random if new
-            try:
-                doctor_obj, created = Doctor.objects.get_or_create(
-                    name=doctor_name)
-                if created:
-                    doctor_obj.rating = round(random.uniform(4.0, 5.0), 2)
-                    doctor_obj.save()
-            except Exception as err:
-                # avoid crashing when table does not yet exist
-                from django.db import utils as db_utils
+            # ensure the authenticated user is actually in the Doctor group
+            if not user.groups.filter(name="Doctor").exists():
+                error = "Doctor account not found. Please contact admin."
+                return render(request, "dashboard/pages/dashboard/login.html", {"error": error, "request": request})
 
-                if isinstance(err, db_utils.OperationalError):
-                    pass
-                else:
-                    raise
+            # ensure a Doctor profile exists (must be provisioned by admin)
+            from doctor.models import Doctor as DoctorModel
+            doctor_profile = DoctorModel.objects.filter(email__iexact=user.email).first()
+            if doctor_profile is None:
+                doctor_name = f"{user.first_name} {user.last_name}".strip() or _name_from_email(user.email or identifier)
+                doctor_profile = DoctorModel.objects.filter(name__iexact=doctor_name).first()
+
+            if doctor_profile is None:
+                error = "Doctor profile not provisioned. Please contact admin."
+                return render(request, "dashboard/pages/dashboard/login.html", {"error": error, "request": request})
+
+            request.session["doctor_name"] = doctor_profile.name
             return redirect("doctor_dashboard")
         else:
             request.session.pop("patient_name", None)
             request.session.pop("admin_name", None)
             request.session.pop("doctor_name", None)
-
-        return redirect("home")
+            return redirect("home")
 
     return render(request, "dashboard/pages/dashboard/login.html")
 

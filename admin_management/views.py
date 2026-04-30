@@ -117,17 +117,20 @@ def _apply_role_to_user(user, role):
             user.groups.add(patient_group)
 
 
-def _create_doctor_profile(full_name):
+def _create_doctor_profile(full_name, email=None):
     from doctor.models import Doctor
 
     doctor_name = full_name.strip() or "Doctor"
     doctor_obj, created = Doctor.objects.get_or_create(
         name=doctor_name,
-        defaults={"rating": Decimal("4.50")},
+        defaults={"rating": Decimal("4.50"), "email": email},
     )
     if created and not doctor_obj.rating:
         doctor_obj.rating = Decimal("4.50")
         doctor_obj.save(update_fields=["rating"])
+    if email and doctor_obj.email != email:
+        doctor_obj.email = email
+        doctor_obj.save(update_fields=["email"])
     return doctor_obj
 
 
@@ -298,7 +301,7 @@ def add_user(request):
         )
 
         _apply_role_to_user(user, role)
-        _create_doctor_profile(f"{first_name} {last_name}".strip())
+        _create_doctor_profile(f"{first_name} {last_name}".strip(), email)
         user.is_superuser = False
         user.save(update_fields=['is_staff', 'is_active', 'is_superuser'])
 
