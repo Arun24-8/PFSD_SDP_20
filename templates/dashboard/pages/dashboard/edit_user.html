@@ -73,7 +73,7 @@
             <form
               class="user-create-form"
               method="post"
-              action="{% url 'edit_user' user_obj.id %}"
+              action="{% if user_obj.id %}{% url 'edit_user' user_obj.id %}{% else %}{% url 'manage_users' %}{% endif %}"
             >
               {% csrf_token %}
               <div class="user-form-grid">

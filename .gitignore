@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environment
+.venv/
+
+# Django local files
+*.sqlite3
+db.sqlite3.bak
+
+# VSCode
+.vscode/
+
+# Byte-compiled / optimized / DLL files
+*.so
+
+# Logs
+*.log

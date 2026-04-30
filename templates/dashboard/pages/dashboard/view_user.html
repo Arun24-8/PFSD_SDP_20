@@ -101,9 +101,15 @@
               <a href="{% url 'manage_users' %}" class="btn-secondary-link"
                 >Close</a
               >
+              {% if user_obj.id %}
               <a href="{% url 'edit_user' user_obj.id %}" class="primary-btn"
                 >Edit User</a
               >
+              {% else %}
+              <a href="{% url 'manage_users' %}" class="primary-btn"
+                >Manage Users</a
+              >
+              {% endif %}
             </div>
           </section>
         </section>
