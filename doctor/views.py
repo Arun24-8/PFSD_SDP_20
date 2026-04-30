@@ -7,7 +7,10 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.contrib.auth import authenticate, login as auth_login
 from django.contrib.auth.models import Group, User
-from datetime import datetime
+from django.db import IntegrityError, transaction
+from datetime import datetime, timedelta
+
+from patient.models import PatientProfile
 
 MONTH_MAP = {
     'JAN': 'Jan', 'FEB': 'Feb', 'MAR': 'Mar', 'APR': 'Apr', 'MAY': 'May', 'JUN': 'Jun',
@@ -64,6 +67,28 @@ def _name_from_email(email):
     cleaned = re.sub(r"[._-]+", " ", local_part)
     normalized = " ".join(cleaned.split())
     return normalized.title() if normalized else "Patient"
+
+
+def _normalize_phone_number(phone_number):
+    cleaned = re.sub(r"[^\d+]", "", phone_number or "")
+    if cleaned.count("+") > 1:
+        cleaned = cleaned.replace("+", "")
+    if "+" in cleaned and not cleaned.startswith("+"):
+        cleaned = cleaned.replace("+", "")
+    return cleaned
+
+
+def _unique_username_from_email(email):
+    local_part = (email or "").split("@", 1)[0].strip().lower()
+    base = re.sub(r"[^a-z0-9_.-]+", "", local_part) or "patient"
+    base = base[:140]
+    username = base
+    suffix = 1
+    while User.objects.filter(username__iexact=username).exists():
+        suffix_text = f".{suffix}"
+        username = f"{base[:150 - len(suffix_text)]}{suffix_text}"
+        suffix += 1
+    return username
 
 
 def _display_name_from_user(user):
@@ -239,6 +264,61 @@ def _db_filtered_prescriptions(doctor_name=None, patient_name=None):
     return prescriptions
 
 
+def _parse_appointment_time_window(time_text):
+    cleaned = (time_text or "").strip()
+    if not cleaned:
+        return None, None
+
+    normalized = cleaned.replace("–", "-").replace("—", "-")
+    parts = [part.strip() for part in normalized.split("-", 1)]
+
+    def _parse_time(value):
+        for fmt in ("%I:%M %p", "%I %p", "%H:%M"):
+            try:
+                return datetime.strptime(value.strip().upper(), fmt).time()
+            except ValueError:
+                continue
+        return None
+
+    start_time = _parse_time(parts[0])
+    end_time = _parse_time(parts[1]) if len(parts) > 1 else None
+    return start_time, end_time
+
+
+def _appointment_join_state(appointment):
+    status = appointment.get("status")
+    if status != Appointment.STATUS_CONFIRMED:
+        return False, "Awaiting Confirmation"
+
+    try:
+        appointment_date = datetime.strptime(
+            f"{appointment.get('day', '01')} {appointment.get('month', 'JAN')} {appointment.get('year', '2026')}",
+            "%d %b %Y",
+        ).date()
+    except ValueError:
+        return False, "Wait until your appointment time"
+
+    now = datetime.now()
+    if appointment_date != now.date():
+        return False, "Wait until your appointment time"
+
+    start_time, end_time = _parse_appointment_time_window(appointment.get("time"))
+    if start_time is None:
+        return False, "Wait until your appointment time"
+
+    current_time = now.time()
+    if end_time is None:
+        end_dt = datetime.combine(now.date(), start_time) + timedelta(minutes=30)
+        end_time = end_dt.time()
+
+    if start_time <= end_time:
+        is_open = start_time <= current_time <= end_time
+    else:
+        is_open = current_time >= start_time or current_time <= end_time
+
+    return is_open, "Join Call" if is_open else "Wait until your appointment time"
+
+
 def _create_prescription_from_post(request, doctor, patient, appointment=None):
     diagnosis = request.POST.get("diagnosis", "").strip()
     status = request.POST.get("status", Prescription.STATUS_ACTIVE)
@@ -371,7 +451,7 @@ def _get_patient_appointments(patient_name):
             ).date().isoformat()
         except ValueError:
             item["date_iso"] = ""
-        item["join_available"] = appointment.get("status") == Appointment.STATUS_CONFIRMED
+        item["join_available"], item["join_label"] = _appointment_join_state(appointment)
         item["status_label"] = appointment.get("status", "PENDING").title()
         appointments.append(item)
     return appointments
@@ -583,41 +663,55 @@ def login(request):
             email = request.POST.get("email", "").strip().lower()
             password = request.POST.get("password", "")
             confirm_password = request.POST.get("confirm_password", "")
-            contact_number = request.POST.get("contact_number", "").strip()
+            contact_number = _normalize_phone_number(
+                request.POST.get("contact_number", "").strip()
+            )
 
             if role != "patient":
                 error = "New accounts can be created from the Patient option only."
-            elif not full_name or not username or not email or not password or not confirm_password:
+            elif not full_name or not email or not contact_number or not password or not confirm_password:
                 error = "Please fill all required fields."
             elif password != confirm_password:
                 error = "Passwords do not match."
-            elif User.objects.filter(username__iexact=username).exists():
-                error = "This username is already taken."
             elif User.objects.filter(email__iexact=email).exists():
                 error = "A user with this email already exists."
+            elif PatientProfile.objects.filter(email__iexact=email).exists():
+                error = "A user with this email already exists."
+            elif PatientProfile.objects.filter(phone_number=contact_number).exists():
+                error = "A user with this phone number already exists."
             else:
                 first_name, _, last_name = full_name.partition(" ")
-                user = User.objects.create_user(
-                    username=username,
-                    email=email,
-                    password=password,
-                    first_name=first_name,
-                    last_name=last_name,
-                )
-                patient_group, _ = Group.objects.get_or_create(name="Patient")
-                user.groups.add(patient_group)
-                if contact_number:
+                try:
+                    with transaction.atomic():
+                        user = User.objects.create_user(
+                            username=_unique_username_from_email(email),
+                            email=email,
+                            password=password,
+                            first_name=first_name,
+                            last_name=last_name,
+                        )
+                        PatientProfile.objects.create(
+                            user=user,
+                            display_username=username,
+                            email=email,
+                            phone_number=contact_number,
+                        )
+                        patient_group, _ = Group.objects.get_or_create(name="Patient")
+                        user.groups.add(patient_group)
+                except IntegrityError:
+                    error = "A user with this email or phone number already exists."
+                else:
                     request.session["patient_contact_number"] = contact_number
-                return render(
-                    request,
-                    "dashboard/pages/dashboard/login.html",
-                    {
-                        "success": "Patient account created successfully. Please sign in.",
-                        "form_mode": "signin",
-                        "selected_role": "patient",
-                        "request": request,
-                    },
-                )
+                    return render(
+                        request,
+                        "dashboard/pages/dashboard/login.html",
+                        {
+                            "success": "Patient account created successfully. Please sign in.",
+                            "form_mode": "signin",
+                            "selected_role": "patient",
+                            "request": request,
+                        },
+                    )
 
             if error:
                 return render(
