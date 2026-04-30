@@ -97,6 +97,43 @@
               </div>
             </div>
 
+            {% if role == 'doctor' and doctor_profile %}
+            <div class="status-item">
+              <div class="status-info">
+                <h4>Doctor Profile Name</h4>
+                <p>{{ doctor_profile.name }}</p>
+              </div>
+            </div>
+
+            <div class="status-item">
+              <div class="status-info">
+                <h4>Doctor Profile Email</h4>
+                <p>{{ doctor_profile.email }}</p>
+              </div>
+            </div>
+
+            <div class="status-item">
+              <div class="status-info">
+                <h4>Doctor Rating</h4>
+                <p>{{ doctor_profile.rating }}</p>
+              </div>
+            </div>
+
+            <div class="status-item">
+              <div class="status-info">
+                <h4>Specialist Type</h4>
+                <p>{{ doctor_profile.specialist_type }}</p>
+              </div>
+            </div>
+
+            <div class="status-item">
+              <div class="status-info">
+                <h4>Timings</h4>
+                <p>{{ doctor_profile.timings|default:'Not set' }}</p>
+              </div>
+            </div>
+            {% endif %}
+
             <div class="user-form-actions">
               <a href="{% url 'manage_users' %}" class="btn-secondary-link"
                 >Close</a

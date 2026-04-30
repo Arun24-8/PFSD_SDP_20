@@ -11,6 +11,28 @@ from .models import AdminProfile
 
 # Create your views here.
 
+SPECIALIST_OPTIONS = [
+    "Cardiology",
+    "Neurology",
+    "Orthopedics",
+    "Pediatrics",
+    "Dermatology",
+    "Gynecology",
+    "Ophthalmology",
+    "ENT",
+    "Psychiatry",
+    "Oncology",
+    "General Medicine",
+]
+
+TIMING_OPTIONS = [
+    "09:00 AM - 11:00 AM",
+    "11:00 AM - 01:00 PM",
+    "02:00 PM - 04:00 PM",
+    "04:00 PM - 06:00 PM",
+    "06:00 PM - 08:00 PM",
+]
+
 
 def is_admin(request):
     """Check if user is logged in as admin"""
@@ -117,21 +139,66 @@ def _apply_role_to_user(user, role):
             user.groups.add(patient_group)
 
 
-def _create_doctor_profile(full_name, email=None):
+def _create_doctor_profile(full_name, email=None, specialist_type=None, timings=None, rating=None):
     from doctor.models import Doctor
 
     doctor_name = full_name.strip() or "Doctor"
+    timing_text = ", ".join(timings or [])
+    final_specialist = specialist_type or "General Medicine"
+    final_rating = rating if rating is not None else Decimal("4.50")
     doctor_obj, created = Doctor.objects.get_or_create(
         name=doctor_name,
-        defaults={"rating": Decimal("4.50"), "email": email},
+        defaults={
+            "rating": final_rating,
+            "email": email,
+            "specialist_type": final_specialist,
+            "timings": timing_text,
+        },
     )
-    if created and not doctor_obj.rating:
-        doctor_obj.rating = Decimal("4.50")
-        doctor_obj.save(update_fields=["rating"])
+    changed_fields = []
+
     if email and doctor_obj.email != email:
         doctor_obj.email = email
-        doctor_obj.save(update_fields=["email"])
+        changed_fields.append("email")
+
+    if doctor_obj.specialist_type != final_specialist:
+        doctor_obj.specialist_type = final_specialist
+        changed_fields.append("specialist_type")
+
+    if doctor_obj.timings != timing_text:
+        doctor_obj.timings = timing_text
+        changed_fields.append("timings")
+
+    if doctor_obj.rating != final_rating:
+        doctor_obj.rating = final_rating
+        changed_fields.append("rating")
+
+    if changed_fields:
+        doctor_obj.save(update_fields=changed_fields)
+
     return doctor_obj
+
+
+def _add_user_template_context(form_data=None, selected_timings=None):
+    return {
+        "specialist_options": SPECIALIST_OPTIONS,
+        "timing_options": TIMING_OPTIONS,
+        "form_data": form_data or {},
+        "selected_timings": selected_timings or [],
+    }
+
+
+def _get_doctor_profile_for_user(user_obj):
+    from doctor.models import Doctor
+
+    doctor_profile = Doctor.objects.filter(email__iexact=user_obj.email).first()
+    if doctor_profile:
+        return doctor_profile
+
+    full_name = f"{(user_obj.first_name or '').strip()} {(user_obj.last_name or '').strip()}".strip()
+    if full_name:
+        return Doctor.objects.filter(name__iexact=full_name).first()
+    return None
 
 
 def _status_to_is_active(status):
@@ -272,23 +339,58 @@ def add_user(request):
         first_name = request.POST.get('first_name', '').strip()
         last_name = request.POST.get('last_name', '').strip()
         email = request.POST.get('email', '').strip().lower()
+        specialist_type = request.POST.get('specialist_type', '').strip()
+        timings = request.POST.getlist('timings')
+        rating_input = request.POST.get('rating', '').strip()
         status = request.POST.get('status', 'active').strip().lower()
         password = request.POST.get('password', '')
         confirm_password = request.POST.get('confirm_password', '')
         role = 'doctor'
 
+        form_data = {
+            'first_name': first_name,
+            'last_name': last_name,
+            'email': email,
+            'specialist_type': specialist_type,
+            'rating': rating_input,
+            'status': status,
+        }
+
         if not first_name or not email or not password:
             messages.error(request, 'Please fill all required fields.')
-            return render(request, 'dashboard/pages/dashboard/add_user.html')
+            return render(request, 'dashboard/pages/dashboard/add_user.html', _add_user_template_context(form_data, timings))
+
+        if specialist_type not in SPECIALIST_OPTIONS:
+            messages.error(request, 'Please select a valid specialist type.')
+            return render(request, 'dashboard/pages/dashboard/add_user.html', _add_user_template_context(form_data, timings))
+
+        if not timings:
+            messages.error(request, 'Please select at least one timing slot.')
+            return render(request, 'dashboard/pages/dashboard/add_user.html', _add_user_template_context(form_data, timings))
+
+        valid_timings = [slot for slot in timings if slot in TIMING_OPTIONS]
+        if len(valid_timings) != len(timings):
+            messages.error(request, 'Please select valid timing slots only.')
+            return render(request, 'dashboard/pages/dashboard/add_user.html', _add_user_template_context(form_data, timings))
+
+        try:
+            rating = Decimal(rating_input or '4.50')
+        except Exception:
+            messages.error(request, 'Please enter a valid rating (for example: 4.50).')
+            return render(request, 'dashboard/pages/dashboard/add_user.html', _add_user_template_context(form_data, timings))
+
+        if rating < 0 or rating > 5:
+            messages.error(request, 'Rating must be between 0 and 5.')
+            return render(request, 'dashboard/pages/dashboard/add_user.html', _add_user_template_context(form_data, timings))
 
         if password != confirm_password:
             messages.error(
                 request, 'Password and confirm password must match.')
-            return render(request, 'dashboard/pages/dashboard/add_user.html')
+            return render(request, 'dashboard/pages/dashboard/add_user.html', _add_user_template_context(form_data, timings))
 
         if User.objects.filter(username=email).exists() or User.objects.filter(email=email).exists():
             messages.error(request, 'A user with this email already exists.')
-            return render(request, 'dashboard/pages/dashboard/add_user.html')
+            return render(request, 'dashboard/pages/dashboard/add_user.html', _add_user_template_context(form_data, timings))
 
         user = User.objects.create_user(
             username=email,
@@ -301,14 +403,23 @@ def add_user(request):
         )
 
         _apply_role_to_user(user, role)
-        _create_doctor_profile(f"{first_name} {last_name}".strip(), email)
+        doctor_profile = _create_doctor_profile(
+            f"{first_name} {last_name}".strip(),
+            email=email,
+            specialist_type=specialist_type,
+            timings=valid_timings,
+            rating=rating,
+        )
         user.is_superuser = False
         user.save(update_fields=['is_staff', 'is_active', 'is_superuser'])
 
-        messages.success(request, 'Doctor account created successfully.')
-        return redirect('manage_users')
+        messages.success(
+            request,
+            f'Doctor account created successfully. Name: {doctor_profile.name}, Email: {doctor_profile.email}, Specialist: {doctor_profile.specialist_type}, Timings: {doctor_profile.timings}, Rating: {doctor_profile.rating}'
+        )
+        return redirect('view_user', user_id=user.id)
 
-    return render(request, 'dashboard/pages/dashboard/add_user.html')
+    return render(request, 'dashboard/pages/dashboard/add_user.html', _add_user_template_context())
 
 
 def view_user(request, user_id):
@@ -317,9 +428,12 @@ def view_user(request, user_id):
         return redirect('login')
 
     user_obj = get_object_or_404(User, pk=user_id)
+    role = _infer_user_role(user_obj)
+    doctor_profile = _get_doctor_profile_for_user(user_obj) if role == 'doctor' else None
     context = {
         'user_obj': user_obj,
-        'role': _infer_user_role(user_obj),
+        'role': role,
+        'doctor_profile': doctor_profile,
     }
     return render(request, 'dashboard/pages/dashboard/view_user.html', context)
 
@@ -367,6 +481,9 @@ def edit_user(request, user_id):
         _apply_role_to_user(user_obj, role)
         user_obj.is_superuser = False
         user_obj.save()
+
+        if role == 'doctor':
+            _create_doctor_profile(f"{first_name} {last_name}".strip(), email=email)
 
         messages.success(request, 'User updated successfully.')
         return redirect('manage_users')

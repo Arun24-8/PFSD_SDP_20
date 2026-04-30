@@ -86,6 +86,7 @@
                     name="first_name"
                     type="text"
                     placeholder="Enter first name"
+                    value="{{ form_data.first_name|default:'' }}"
                     required
                   />
                 </div>
@@ -97,6 +98,7 @@
                     name="last_name"
                     type="text"
                     placeholder="Enter last name"
+                    value="{{ form_data.last_name|default:'' }}"
                   />
                 </div>
 
@@ -107,27 +109,59 @@
                     name="email"
                     type="email"
                     placeholder="Enter email address"
+                    value="{{ form_data.email|default:'' }}"
                     required
                   />
                 </div>
 
                 <div class="user-field-group">
-                  <label for="phone">Phone Number</label>
-                  <input
-                    id="phone"
-                    name="phone"
-                    type="text"
-                    placeholder="Enter phone number"
-                  />
+                  <label for="specialist_type">Specialist Type *</label>
+                  <select id="specialist_type" name="specialist_type" required>
+                    <option value="">Select specialist</option>
+                    {% for specialist in specialist_options %}
+                    <option value="{{ specialist }}" {% if form_data.specialist_type == specialist %}selected{% endif %}>{{ specialist }}</option>
+                    {% endfor %}
+                  </select>
                 </div>
 
                 <div class="user-field-group">
                   <label for="status">Status</label>
                   <select id="status" name="status">
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
-                    <option value="suspended">Suspended</option>
+                    <option value="active" {% if form_data.status|default:'active' == 'active' %}selected{% endif %}>Active</option>
+                    <option value="inactive" {% if form_data.status == 'inactive' %}selected{% endif %}>Inactive</option>
+                    <option value="suspended" {% if form_data.status == 'suspended' %}selected{% endif %}>Suspended</option>
                   </select>
+                </div>
+
+                <div class="user-field-group">
+                  <label for="rating">Rating (0 to 5)</label>
+                  <input
+                    id="rating"
+                    name="rating"
+                    type="number"
+                    min="0"
+                    max="5"
+                    step="0.01"
+                    placeholder="4.50"
+                    value="{{ form_data.rating|default:'4.50' }}"
+                  />
+                </div>
+
+                <div class="user-field-group" style="grid-column: 1 / -1">
+                  <label>Timings * (Select multiple)</label>
+                  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px; margin-top: 8px;">
+                    {% for timing in timing_options %}
+                    <label style="display: flex; align-items: center; gap: 8px; font-weight: 500;">
+                      <input
+                        type="checkbox"
+                        name="timings"
+                        value="{{ timing }}"
+                        {% if timing in selected_timings %}checked{% endif %}
+                      />
+                      <span>{{ timing }}</span>
+                    </label>
+                    {% endfor %}
+                  </div>
                 </div>
 
                 <div class="user-field-group">

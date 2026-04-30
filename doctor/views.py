@@ -65,11 +65,88 @@ def _name_from_email(email):
     return normalized.title() if normalized else "Patient"
 
 
-def _get_patient_appointments(patient_name):
+def _display_name_from_user(user):
+    full_name = f"{(user.first_name or '').strip()} {(user.last_name or '').strip()}".strip()
+    if full_name:
+        return full_name
+    return _name_from_email(user.email or user.username)
+
+
+def _db_patient_cards():
+    patient_users = (
+        User.objects.filter(groups__name="Patient", is_active=True)
+        .distinct()
+        .order_by("first_name", "last_name", "username")
+    )
+    cards = []
+    for user in patient_users:
+        cards.append({
+            "name": _display_name_from_user(user),
+            "age": "N/A",
+            "gender": "N/A",
+            "condition": "General Consultation",
+            "last_visit": "N/A",
+            "risk": "Low",
+        })
+    return cards
+
+
+def _db_patient_name_set():
+    return {
+        patient.get("name", "").strip().lower()
+        for patient in _db_patient_cards()
+        if patient.get("name")
+    }
+
+
+def _db_doctor_cards():
+    cards = []
+    for doctor in Doctor.objects.order_by("name"):
+        doctor_name = doctor.name or "Doctor"
+        if not doctor_name.lower().startswith("dr."):
+            doctor_name = f"Dr. {doctor_name}"
+        cards.append({
+            "specialist": "General Medicine",
+            "name": doctor_name,
+            "city": "Available Online",
+            "rating": f"{doctor.rating}",
+            "reviews": 0,
+        })
+    return cards
+
+
+def _db_filtered_appointments():
+    allowed_patients = _db_patient_name_set()
     appointments = []
     for idx, appointment in enumerate(DOCTOR_APPOINTMENTS):
+        patient_key = appointment.get("patient", "").strip().lower()
+        if patient_key and patient_key in allowed_patients:
+            item = appointment.copy()
+            item["appointment_index"] = idx
+            appointments.append(item)
+    return appointments
+
+
+def _db_filtered_prescriptions():
+    allowed_patients = _db_patient_name_set()
+    prescriptions = []
+    for idx, prescription in enumerate(DOCTOR_E_PRESCRIPTIONS):
+        patient_key = prescription.get("patient", "").strip().lower()
+        if patient_key and patient_key in allowed_patients:
+            item = prescription.copy()
+            item["index"] = idx
+            item["status_label"] = prescription.get("status", "ACTIVE").title()
+            prescriptions.append(item)
+    return prescriptions
+
+
+def _get_patient_appointments(patient_name):
+    patient_key = (patient_name or "").strip().lower()
+    appointments = []
+    for appointment in _db_filtered_appointments():
+        if appointment.get("patient", "").strip().lower() != patient_key:
+            continue
         item = appointment.copy()
-        item["appointment_index"] = idx
         try:
             item["date_iso"] = datetime.strptime(
                 f"{appointment.get('day', '01')} {appointment.get('month', 'JAN')} {appointment.get('year', '2026')}",
@@ -84,11 +161,12 @@ def _get_patient_appointments(patient_name):
 
 
 def _get_patient_prescriptions(patient_name):
+    patient_key = (patient_name or "").strip().lower()
     prescriptions = []
-    for idx, prescription in enumerate(DOCTOR_E_PRESCRIPTIONS):
+    for prescription in _db_filtered_prescriptions():
+        if prescription.get("patient", "").strip().lower() != patient_key:
+            continue
         item = prescription.copy()
-        item["index"] = idx
-        item["status_label"] = prescription.get("status", "ACTIVE").title()
         prescriptions.append(item)
     return prescriptions
 
@@ -158,7 +236,7 @@ def patient_appointment_doctors(request):
         "dashboard/pages/patient/appointments_doctors.html",
         {
             "patient_name": patient_name,
-            "doctors": PATIENT_BOOKING_DOCTORS,
+            "doctors": _db_doctor_cards(),
         },
     )
 
@@ -253,7 +331,7 @@ def login(request):
         auth_login(request, user)
 
         if role == "patient":
-            request.session["patient_name"] = _name_from_email(identifier)
+            request.session["patient_name"] = _display_name_from_user(user)
             return redirect("patient_dashboard")
         elif role == "admin":
             if not user.is_staff:
@@ -500,9 +578,8 @@ def doctor_dashboard(request):
     # matches current local time (to the minute)
     now = datetime.now()
     appointments_for_dashboard = []
-    for idx, appt in enumerate(DOCTOR_APPOINTMENTS):
+    for appt in _db_filtered_appointments():
         item = appt.copy()
-        item["appointment_index"] = idx
         # Build a parseable datetime string if date parts are present
         join_enabled = False
         try:
@@ -583,14 +660,13 @@ def doctor_appointments(request):
 
     pending_count = 0
     active_appointments = []
-    for appointment_index, appointment in enumerate(DOCTOR_APPOINTMENTS):
+    for appointment in _db_filtered_appointments():
         if appointment.get("status") == "PENDING":
             pending_count += 1
         if appointment.get("status") in {"COMPLETED", "REJECTED"}:
             continue
 
         item = appointment.copy()
-        item["appointment_index"] = appointment_index
         active_appointments.append(item)
 
     return render(
@@ -611,10 +687,9 @@ def doctor_user_pendings(request):
         return redirect("login")
 
     reminders = []
-    for appointment_index, appointment in enumerate(DOCTOR_APPOINTMENTS):
+    for appointment in _db_filtered_appointments():
         if appointment.get("status") == "PENDING":
             item = appointment.copy()
-            item["appointment_index"] = appointment_index
             reminders.append(item)
 
     return render(
@@ -661,20 +736,10 @@ def doctor_pending_patient_detail(request, appointment_index):
         appointment_patient_name = appointment.get(
             "patient", "").strip().lower()
 
-        for known_patient in DOCTOR_PATIENTS:
+        for known_patient in _db_patient_cards():
             if known_patient.get("name", "").strip().lower() == appointment_patient_name:
                 patient = known_patient
                 break
-
-        if patient is None:
-            patient = {
-                "name": appointment.get("patient", "Patient"),
-                "age": "N/A",
-                "gender": "N/A",
-                "condition": appointment.get("reason", "Pending consultation"),
-                "last_visit": "N/A",
-                "risk": "Pending",
-            }
 
     return render(
         request,
@@ -683,6 +748,7 @@ def doctor_pending_patient_detail(request, appointment_index):
             "doctor_name": doctor_name,
             "active": "appointments",
             "patient": patient,
+            "patient_index": appointment_index,
         },
     )
 
@@ -693,7 +759,7 @@ def doctor_patients(request):
         return redirect("login")
 
     prescription_map = {}
-    for prescription in DOCTOR_E_PRESCRIPTIONS:
+    for prescription in _db_filtered_prescriptions():
         patient_key = prescription.get("patient", "").strip().lower()
         medicine_names = [
             medicine.get("name", "")
@@ -705,13 +771,14 @@ def doctor_patients(request):
         prescription_map[patient_key] = f"{prescription.get('diagnosis', 'Prescription')}: {summary}"
 
     patient_cards = []
-    for patient in DOCTOR_PATIENTS:
+    for idx, patient in enumerate(_db_patient_cards()):
         item = patient.copy()
         patient_key = patient.get("name", "").strip().lower()
         item["prescription_summary"] = prescription_map.get(
             patient_key,
             "No e-prescription available",
         )
+        item["patient_index"] = idx
         patient_cards.append(item)
 
     return render(
@@ -731,8 +798,9 @@ def doctor_patient_detail(request, patient_index):
         return redirect("login")
 
     patient = None
-    if 0 <= patient_index < len(DOCTOR_PATIENTS):
-        patient = DOCTOR_PATIENTS[patient_index]
+    db_patients = _db_patient_cards()
+    if 0 <= patient_index < len(db_patients):
+        patient = db_patients[patient_index]
 
     return render(
         request,
@@ -762,11 +830,12 @@ def doctor_patient_prescription(request, patient_index):
         "after_dinner": False,
     }
 
-    if 0 <= patient_index < len(DOCTOR_PATIENTS):
-        patient = DOCTOR_PATIENTS[patient_index]
+    db_patients = _db_patient_cards()
+    if 0 <= patient_index < len(db_patients):
+        patient = db_patients[patient_index]
         patient_key = patient.get("name", "").strip().lower()
 
-        for prescription in DOCTOR_E_PRESCRIPTIONS:
+        for prescription in _db_filtered_prescriptions():
             if prescription.get("patient", "").strip().lower() == patient_key:
                 prescriptions.append(prescription)
 
@@ -852,7 +921,7 @@ def doctor_e_prescriptions(request):
         {
             "doctor_name": doctor_name,
             "active": "e_prescriptions",
-            "prescriptions": DOCTOR_E_PRESCRIPTIONS,
+            "prescriptions": _db_filtered_prescriptions(),
         },
     )
 
@@ -870,9 +939,9 @@ def doctor_reports(request):
             "active": "reports",
             "reports": DOCTOR_REPORTS,
             "report_totals": {
-                "consultations": len(DOCTOR_APPOINTMENTS),
-                "patients": len(DOCTOR_PATIENTS),
-                "prescriptions": len(DOCTOR_E_PRESCRIPTIONS),
+                "consultations": len(_db_filtered_appointments()),
+                "patients": len(_db_patient_cards()),
+                "prescriptions": len(_db_filtered_prescriptions()),
             },
         },
     )
